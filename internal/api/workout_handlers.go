@@ -5,13 +5,12 @@ import (
 
 	"github.com/go-chi/chi/v5"
 	"github.com/google/uuid"
-	"github.com/othavioBF/pandoragym-go-api/internal/middleware/auth"
 	"github.com/othavioBF/pandoragym-go-api/internal/infra/pgstore"
 	"github.com/othavioBF/pandoragym-go-api/internal/utils"
 )
 
 func (api *API) GetWorkouts(w http.ResponseWriter, r *http.Request) {
-	userID := auth.GetUserIDFromContext(r.Context())
+	userID := api.GetUserIDFromContext(r.Context())
 	if userID == uuid.Nil {
 		utils.WriteErrorResponse(w, http.StatusUnauthorized, "Unauthorized")
 		return
@@ -30,7 +29,7 @@ func (api *API) GetWorkouts(w http.ResponseWriter, r *http.Request) {
 }
 
 func (api *API) GetWorkout(w http.ResponseWriter, r *http.Request) {
-	userID := auth.GetUserIDFromContext(r.Context())
+	userID := api.GetUserIDFromContext(r.Context())
 	if userID == uuid.Nil {
 		utils.WriteErrorResponse(w, http.StatusUnauthorized, "Unauthorized")
 		return
@@ -61,7 +60,7 @@ func (api *API) GetWorkout(w http.ResponseWriter, r *http.Request) {
 }
 
 func (api *API) CreateWorkout(w http.ResponseWriter, r *http.Request) {
-	userID := auth.GetUserIDFromContext(r.Context())
+	userID := api.GetUserIDFromContext(r.Context())
 	if userID == uuid.Nil {
 		utils.WriteErrorResponse(w, http.StatusUnauthorized, "Unauthorized")
 		return
@@ -86,7 +85,7 @@ func (api *API) CreateWorkout(w http.ResponseWriter, r *http.Request) {
 }
 
 func (api *API) UpdateWorkout(w http.ResponseWriter, r *http.Request) {
-	userID := auth.GetUserIDFromContext(r.Context())
+	userID := api.GetUserIDFromContext(r.Context())
 	if userID == uuid.Nil {
 		utils.WriteErrorResponse(w, http.StatusUnauthorized, "Unauthorized")
 		return
@@ -123,7 +122,7 @@ func (api *API) UpdateWorkout(w http.ResponseWriter, r *http.Request) {
 }
 
 func (api *API) DeleteWorkout(w http.ResponseWriter, r *http.Request) {
-	userID := auth.GetUserIDFromContext(r.Context())
+	userID := api.GetUserIDFromContext(r.Context())
 	if userID == uuid.Nil {
 		utils.WriteErrorResponse(w, http.StatusUnauthorized, "Unauthorized")
 		return
@@ -155,7 +154,7 @@ func (api *API) DeleteWorkout(w http.ResponseWriter, r *http.Request) {
 
 // Exercise handlers
 func (api *API) GetExercises(w http.ResponseWriter, r *http.Request) {
-	userID := auth.GetUserIDFromContext(r.Context())
+	userID := api.GetUserIDFromContext(r.Context())
 	if userID == uuid.Nil {
 		utils.WriteErrorResponse(w, http.StatusUnauthorized, "Unauthorized")
 		return
@@ -174,7 +173,7 @@ func (api *API) GetExercises(w http.ResponseWriter, r *http.Request) {
 }
 
 func (api *API) GetExercise(w http.ResponseWriter, r *http.Request) {
-	userID := auth.GetUserIDFromContext(r.Context())
+	userID := api.GetUserIDFromContext(r.Context())
 	if userID == uuid.Nil {
 		utils.WriteErrorResponse(w, http.StatusUnauthorized, "Unauthorized")
 		return
@@ -205,7 +204,7 @@ func (api *API) GetExercise(w http.ResponseWriter, r *http.Request) {
 }
 
 func (api *API) CreateExercise(w http.ResponseWriter, r *http.Request) {
-	userID := auth.GetUserIDFromContext(r.Context())
+	userID := api.GetUserIDFromContext(r.Context())
 	if userID == uuid.Nil {
 		utils.WriteErrorResponse(w, http.StatusUnauthorized, "Unauthorized")
 		return
@@ -230,7 +229,7 @@ func (api *API) CreateExercise(w http.ResponseWriter, r *http.Request) {
 }
 
 func (api *API) UpdateExercise(w http.ResponseWriter, r *http.Request) {
-	userID := auth.GetUserIDFromContext(r.Context())
+	userID := api.GetUserIDFromContext(r.Context())
 	if userID == uuid.Nil {
 		utils.WriteErrorResponse(w, http.StatusUnauthorized, "Unauthorized")
 		return
@@ -267,7 +266,7 @@ func (api *API) UpdateExercise(w http.ResponseWriter, r *http.Request) {
 }
 
 func (api *API) DeleteExercise(w http.ResponseWriter, r *http.Request) {
-	userID := auth.GetUserIDFromContext(r.Context())
+	userID := api.GetUserIDFromContext(r.Context())
 	if userID == uuid.Nil {
 		utils.WriteErrorResponse(w, http.StatusUnauthorized, "Unauthorized")
 		return
@@ -299,7 +298,7 @@ func (api *API) DeleteExercise(w http.ResponseWriter, r *http.Request) {
 
 // Exercise to workout handlers
 func (api *API) AddExerciseToWorkout(w http.ResponseWriter, r *http.Request) {
-	userID := auth.GetUserIDFromContext(r.Context())
+	userID := api.GetUserIDFromContext(r.Context())
 	if userID == uuid.Nil {
 		utils.WriteErrorResponse(w, http.StatusUnauthorized, "Unauthorized")
 		return
@@ -333,7 +332,7 @@ func (api *API) AddExerciseToWorkout(w http.ResponseWriter, r *http.Request) {
 }
 
 func (api *API) RemoveExerciseFromWorkout(w http.ResponseWriter, r *http.Request) {
-	userID := auth.GetUserIDFromContext(r.Context())
+	userID := api.GetUserIDFromContext(r.Context())
 	if userID == uuid.Nil {
 		utils.WriteErrorResponse(w, http.StatusUnauthorized, "Unauthorized")
 		return

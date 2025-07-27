@@ -3,7 +3,6 @@ package api
 import (
 	"github.com/go-chi/chi/v5"
 	"github.com/go-chi/chi/v5/middleware"
-	"github.com/othavioBF/pandoragym-go-api/internal/middleware/auth"
 )
 
 func (api *API) BindRoutes() {
@@ -30,7 +29,7 @@ func (api *API) BindRoutes() {
 
 	// Protected routes
 	api.Router.Route("/api", func(r chi.Router) {
-		r.Use(auth.JWTMiddleware)
+		r.Use(api.JWTMiddleware)
 
 		// User routes
 		r.Route("/users", func(r chi.Router) {
@@ -70,7 +69,7 @@ func (api *API) BindRoutes() {
 
 		// Personal trainer specific routes
 		r.Route("/personal", func(r chi.Router) {
-			r.Use(auth.PersonalOnlyMiddleware)
+			r.Use(api.PersonalOnlyMiddleware)
 			r.Get("/students", api.GetPersonalStudents)
 			r.Get("/students/{id}/evolution", api.GetStudentEvolution)
 			r.Post("/messages", api.SendMessage)
@@ -80,7 +79,7 @@ func (api *API) BindRoutes() {
 
 		// Student specific routes
 		r.Route("/student", func(r chi.Router) {
-			r.Use(auth.StudentOnlyMiddleware)
+			r.Use(api.StudentOnlyMiddleware)
 			r.Get("/workouts/history", api.GetWorkoutHistory)
 			r.Post("/workouts/{id}/execute", api.ExecuteWorkout)
 			r.Post("/workouts/{id}/rate", api.RateWorkout)
@@ -88,7 +87,7 @@ func (api *API) BindRoutes() {
 
 		// Admin routes
 		r.Route("/admin", func(r chi.Router) {
-			r.Use(auth.AdminOnlyMiddleware)
+			r.Use(api.AdminOnlyMiddleware)
 			r.Get("/users", api.GetAllUsers)
 			r.Get("/statistics", api.GetStatistics)
 		})

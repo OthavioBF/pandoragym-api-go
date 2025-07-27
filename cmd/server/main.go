@@ -14,27 +14,23 @@ import (
 )
 
 func main() {
-	// Load environment variables
 	if err := godotenv.Load(); err != nil {
 		log.Printf("Warning: .env file not found: %v", err)
 	}
 
 	gob.Register(uuid.UUID{})
 
-	// Get database URL from environment
 	databaseURL := os.Getenv("DATABASE_URL")
 	if databaseURL == "" {
 		log.Fatal("DATABASE_URL environment variable is required")
 	}
 
-	// Initialize database connection
 	pool, err := pgstore.InitDB(databaseURL)
 	if err != nil {
 		log.Fatalf("Failed to initialize database: %v", err)
 	}
 	defer pool.Close()
 
-	// Create database queries instance
 	queries := pgstore.NewQueries(pool)
 
 	// Initialize API with dependency injection

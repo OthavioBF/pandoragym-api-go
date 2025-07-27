@@ -5,13 +5,12 @@ import (
 
 	"github.com/go-chi/chi/v5"
 	"github.com/google/uuid"
-	"github.com/othavioBF/pandoragym-go-api/internal/middleware/auth"
 	"github.com/othavioBF/pandoragym-go-api/internal/infra/pgstore"
 	"github.com/othavioBF/pandoragym-go-api/internal/utils"
 )
 
 func (api *API) GetSchedulings(w http.ResponseWriter, r *http.Request) {
-	userID := auth.GetUserIDFromContext(r.Context())
+	userID := api.GetUserIDFromContext(r.Context())
 	if userID == uuid.Nil {
 		utils.WriteErrorResponse(w, http.StatusUnauthorized, "Unauthorized")
 		return
@@ -30,7 +29,7 @@ func (api *API) GetSchedulings(w http.ResponseWriter, r *http.Request) {
 }
 
 func (api *API) GetScheduling(w http.ResponseWriter, r *http.Request) {
-	userID := auth.GetUserIDFromContext(r.Context())
+	userID := api.GetUserIDFromContext(r.Context())
 	if userID == uuid.Nil {
 		utils.WriteErrorResponse(w, http.StatusUnauthorized, "Unauthorized")
 		return
@@ -61,7 +60,7 @@ func (api *API) GetScheduling(w http.ResponseWriter, r *http.Request) {
 }
 
 func (api *API) CreateScheduling(w http.ResponseWriter, r *http.Request) {
-	userID := auth.GetUserIDFromContext(r.Context())
+	userID := api.GetUserIDFromContext(r.Context())
 	if userID == uuid.Nil {
 		utils.WriteErrorResponse(w, http.StatusUnauthorized, "Unauthorized")
 		return
@@ -86,7 +85,7 @@ func (api *API) CreateScheduling(w http.ResponseWriter, r *http.Request) {
 }
 
 func (api *API) UpdateScheduling(w http.ResponseWriter, r *http.Request) {
-	userID := auth.GetUserIDFromContext(r.Context())
+	userID := api.GetUserIDFromContext(r.Context())
 	if userID == uuid.Nil {
 		utils.WriteErrorResponse(w, http.StatusUnauthorized, "Unauthorized")
 		return
@@ -123,7 +122,7 @@ func (api *API) UpdateScheduling(w http.ResponseWriter, r *http.Request) {
 }
 
 func (api *API) CancelScheduling(w http.ResponseWriter, r *http.Request) {
-	userID := auth.GetUserIDFromContext(r.Context())
+	userID := api.GetUserIDFromContext(r.Context())
 	if userID == uuid.Nil {
 		utils.WriteErrorResponse(w, http.StatusUnauthorized, "Unauthorized")
 		return
@@ -160,7 +159,7 @@ func (api *API) CancelScheduling(w http.ResponseWriter, r *http.Request) {
 }
 
 func (api *API) StartScheduling(w http.ResponseWriter, r *http.Request) {
-	userID := auth.GetUserIDFromContext(r.Context())
+	userID := api.GetUserIDFromContext(r.Context())
 	if userID == uuid.Nil {
 		utils.WriteErrorResponse(w, http.StatusUnauthorized, "Unauthorized")
 		return
@@ -191,7 +190,7 @@ func (api *API) StartScheduling(w http.ResponseWriter, r *http.Request) {
 }
 
 func (api *API) CompleteScheduling(w http.ResponseWriter, r *http.Request) {
-	userID := auth.GetUserIDFromContext(r.Context())
+	userID := api.GetUserIDFromContext(r.Context())
 	if userID == uuid.Nil {
 		utils.WriteErrorResponse(w, http.StatusUnauthorized, "Unauthorized")
 		return
