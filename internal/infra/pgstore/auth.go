@@ -12,15 +12,15 @@ import (
 type AuthenticateRequest struct {
 	Email      string  `json:"email" validate:"required,email"`
 	Password   string  `json:"password" validate:"required"`
-	DeviceInfo *string `json:"device_info,omitempty"`
-	IPAddress  *string `json:"ip_address,omitempty"`
+	DeviceInfo *string `json:"deviceInfo,omitempty"`
+	IPAddress  *string `json:"ipAddress,omitempty"`
 }
 
 type AuthenticateResponse struct {
 	User         UserResponse `json:"user"`
 	Token        string       `json:"token"`
-	RefreshToken string       `json:"refresh_token"`
-	ExpiresIn    int64        `json:"expires_in"`
+	RefreshToken string       `json:"refreshToken"`
+	ExpiresIn    int64        `json:"expiresIn"`
 }
 
 type PasswordRecoverRequest struct {
@@ -33,9 +33,9 @@ type ResetPasswordRequest struct {
 }
 
 type CreatePasswordResetTokenParams struct {
-	UserID    uuid.UUID `json:"user_id"`
+	UserID    uuid.UUID `json:"userId"`
 	Token     string    `json:"token"`
-	ExpiresAt time.Time `json:"expires_at"`
+	ExpiresAt time.Time `json:"expiresAt"`
 }
 
 const createPasswordResetToken = `-- name: CreatePasswordResetToken :exec

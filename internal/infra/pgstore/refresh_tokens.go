@@ -10,19 +10,19 @@ import (
 
 // Refresh Token types
 type RefreshTokenRequest struct {
-	RefreshToken string `json:"refresh_token" validate:"required"`
+	RefreshToken string `json:"refreshToken" validate:"required"`
 }
 
 type RefreshTokenResponse struct {
-	AccessToken  string `json:"access_token"`
-	RefreshToken string `json:"refresh_token"`
-	ExpiresIn    int64  `json:"expires_in"`
+	AccessToken  string `json:"accessToken"`
+	RefreshToken string `json:"refreshToken"`
+	ExpiresIn    int64  `json:"expiresIn"`
 }
 
 type CreateRefreshTokenRequest struct {
-	UserID     uuid.UUID `json:"user_id" validate:"required"`
-	DeviceInfo *string   `json:"device_info,omitempty"`
-	IPAddress  *string   `json:"ip_address,omitempty"`
+	UserID     uuid.UUID `json:"userId" validate:"required"`
+	DeviceInfo *string   `json:"deviceInfo,omitempty"`
+	IPAddress  *string   `json:"ipAddress,omitempty"`
 }
 
 type CreateRefreshTokenParams struct {
