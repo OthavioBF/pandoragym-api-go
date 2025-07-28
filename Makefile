@@ -51,30 +51,78 @@ deploy-app:
 
 # Database-only Docker commands
 db-start:
-	docker-compose -f docker-compose.db.yml up -d
+	@echo "📊 Starting PostgreSQL Docker container..."
+	@docker-compose -f docker-compose.db.yml up -d
+	@echo "⏳ Waiting for database to be ready..."
+	@for i in 1 2 3 4 5 6 7 8 9 10; do \
+		if docker-compose -f docker-compose.db.yml exec -T db pg_isready -U pandoragym -d pandoragym_db > /dev/null 2>&1; then \
+			echo "✅ Database is ready!"; \
+			exit 0; \
+		fi; \
+		echo "Waiting... ($$i/10)"; \
+		sleep 3; \
+	done; \
+	echo "❌ Database failed to start!" && exit 1
 
 db-stop:
-	docker-compose -f docker-compose.db.yml stop
+	@echo "🛑 Stopping PostgreSQL Docker container..."
+	@docker-compose -f docker-compose.db.yml stop
+	@echo "✅ Database stopped!"
+
+db-restart:
+	@echo "🔄 Restarting PostgreSQL Docker container..."
+	@make db-stop
+	@make db-start
 
 db-logs:
-	docker-compose -f docker-compose.db.yml logs -f db
+	@echo "📋 Showing PostgreSQL logs..."
+	@docker-compose -f docker-compose.db.yml logs -f db
+
+db-shell:
+	@echo "🐚 Connecting to PostgreSQL shell..."
+	@docker-compose -f docker-compose.db.yml exec db psql -U pandoragym -d pandoragym_db
+
+db-status:
+	@echo "📊 Database Status:"
+	@echo "=================="
+	@printf "Container: "
+	@if docker-compose -f docker-compose.db.yml ps | grep pandoragym_db | grep Up > /dev/null; then \
+		echo "✅ Running"; \
+	else \
+		echo "❌ Stopped"; \
+	fi
+	@printf "Health: "
+	@if docker-compose -f docker-compose.db.yml exec -T db pg_isready -U pandoragym -d pandoragym_db > /dev/null 2>&1; then \
+		echo "✅ Healthy"; \
+	else \
+		echo "❌ Unhealthy"; \
+	fi
 
 db-remove:
-	docker-compose -f docker-compose.db.yml down -v
+	@echo "🗑️  Removing PostgreSQL Docker container and volumes..."
+	@docker-compose -f docker-compose.db.yml down -v
+	@echo "✅ Database removed!"
+
+db-reset: db-remove db-start
+	@echo "🔄 Database reset complete!"
 
 # Local services management (PostgreSQL + Go App)
 local-start:
 	@echo "🚀 Starting local PandoraGym services..."
-	@echo "📊 Starting PostgreSQL..."
-	@brew services start postgresql@15
-	@sleep 3
-	@echo "🔗 Testing database connection..."
-	@export PATH="/opt/homebrew/opt/postgresql@15/bin:$$PATH" && \
-	if psql -h localhost -p 5433 -U pandoragym -d pandoragym_db -c "SELECT 1;" > /dev/null 2>&1; then \
-		echo "✅ Database connection successful!"; \
-	else \
-		echo "⚠️  Database not found - run 'make local-setup' for first-time setup"; \
-	fi
+	@echo "📊 Starting PostgreSQL with Docker..."
+	@docker-compose -f docker-compose.db.yml up -d
+	@echo "⏳ Waiting for database to be ready..."
+	@for i in 1 2 3 4 5 6 7 8 9 10; do \
+		if docker-compose -f docker-compose.db.yml exec -T db pg_isready -U pandoragym -d pandoragym_db > /dev/null 2>&1; then \
+			echo "✅ Database is ready!"; \
+			break; \
+		fi; \
+		echo "Waiting... ($$i/10)"; \
+		sleep 3; \
+		if [ $$i -eq 10 ]; then \
+			echo "❌ Database failed to start!" && exit 1; \
+		fi; \
+	done
 	@echo "🚀 Starting Go application with hot reload..."
 	@nohup air > app.log 2>&1 & echo $$! > app.pid
 	@sleep 5
@@ -82,7 +130,7 @@ local-start:
 	@if curl -s http://localhost:3333/health > /dev/null; then \
 		echo "✅ Application is running successfully!"; \
 		echo "🌐 API available at: http://localhost:3333"; \
-		echo "🗄️  Database available at: localhost:5433"; \
+		echo "🗄️  Database available at: localhost:5432"; \
 		echo ""; \
 		echo "💡 Tip: If you need database setup, run 'make local-setup'"; \
 	else \
@@ -101,8 +149,8 @@ local-stop:
 	@pkill -f "go run cmd/server/main.go" 2>/dev/null || true
 	@pkill -f "pandoragym-api" 2>/dev/null || true
 	@lsof -ti:3333 | xargs kill -9 2>/dev/null || true
-	@echo "🗄️  Stopping PostgreSQL..."
-	@brew services stop postgresql@15
+	@echo "🗄️  Stopping PostgreSQL Docker container..."
+	@docker-compose -f docker-compose.db.yml down
 	@echo "✅ All services stopped!"
 
 local-restart: local-stop local-start
@@ -111,8 +159,8 @@ local-status:
 	@echo "📊 Local Services Status:"
 	@echo "========================="
 	@printf "PostgreSQL: "
-	@if brew services list | grep postgresql@15 | grep started > /dev/null; then \
-		echo "✅ Running"; \
+	@if docker-compose -f docker-compose.db.yml ps | grep pandoragym_db | grep Up > /dev/null; then \
+		echo "✅ Running (Docker)"; \
 	else \
 		echo "❌ Stopped"; \
 	fi
@@ -123,51 +171,32 @@ local-status:
 		echo "❌ Stopped"; \
 	fi
 	@printf "Database Connection: "
-	@export PATH="/opt/homebrew/opt/postgresql@15/bin:$$PATH" && \
-	if psql -h localhost -p 5433 -U pandoragym -d pandoragym_db -c "SELECT 1;" > /dev/null 2>&1; then \
-		echo "✅ Connected (port 5433)"; \
+	@if docker-compose -f docker-compose.db.yml exec -T db pg_isready -U pandoragym -d pandoragym_db > /dev/null 2>&1; then \
+		echo "✅ Connected (port 5432)"; \
 	else \
 		echo "❌ Failed"; \
 	fi
 
-# Complete local setup (database creation + start services + migrations + seed)
 local-setup:
 	@echo "🎯 PandoraGym API - Complete Local Setup"
 	@echo "========================================"
 	@echo ""
-	@echo "📊 Starting PostgreSQL..."
-	@brew services start postgresql@15
-	@sleep 3
-	@echo "🔧 Setting up database..."
-	@export PATH="/opt/homebrew/opt/postgresql@15/bin:$$PATH" && \
-	if ! psql -h localhost -p 5433 -U $(shell whoami) -lqt | cut -d \| -f 1 | grep -qw pandoragym_db; then \
-		echo "📦 Creating database 'pandoragym_db'..."; \
-		createdb -h localhost -p 5433 -U $(shell whoami) pandoragym_db; \
-		echo "✅ Database created successfully!"; \
-	else \
-		echo "✅ Database 'pandoragym_db' already exists"; \
-	fi
-	@echo "👤 Setting up database user..."
-	@export PATH="/opt/homebrew/opt/postgresql@15/bin:$$PATH" && \
-	if ! psql -h localhost -p 5433 -U $(shell whoami) -d pandoragym_db -tAc "SELECT 1 FROM pg_roles WHERE rolname='pandoragym'" | grep -q 1; then \
-		echo "👤 Creating user 'pandoragym'..."; \
-		psql -h localhost -p 5433 -U $(shell whoami) -d pandoragym_db -c "CREATE USER pandoragym WITH PASSWORD 'password';"; \
-		echo "✅ User created successfully!"; \
-	else \
-		echo "✅ User 'pandoragym' already exists"; \
-	fi
-	@echo "🔐 Setting up database permissions..."
-	@export PATH="/opt/homebrew/opt/postgresql@15/bin:$$PATH" && \
-	psql -h localhost -p 5433 -U $(shell whoami) -d pandoragym_db -c "GRANT ALL PRIVILEGES ON DATABASE pandoragym_db TO pandoragym;" > /dev/null && \
-	psql -h localhost -p 5433 -U $(shell whoami) -d pandoragym_db -c "ALTER USER pandoragym CREATEDB;" > /dev/null && \
-	psql -h localhost -p 5433 -U $(shell whoami) -d pandoragym_db -c "GRANT ALL ON SCHEMA public TO pandoragym;" > /dev/null && \
-	psql -h localhost -p 5433 -U $(shell whoami) -d pandoragym_db -c "GRANT ALL PRIVILEGES ON ALL TABLES IN SCHEMA public TO pandoragym;" > /dev/null && \
-	psql -h localhost -p 5433 -U $(shell whoami) -d pandoragym_db -c "GRANT ALL PRIVILEGES ON ALL SEQUENCES IN SCHEMA public TO pandoragym;" > /dev/null && \
-	psql -h localhost -p 5433 -U $(shell whoami) -d pandoragym_db -c "ALTER DEFAULT PRIVILEGES IN SCHEMA public GRANT ALL ON TABLES TO pandoragym;" > /dev/null
-	@echo "✅ Database permissions configured!"
+	@echo "📊 Starting PostgreSQL with Docker..."
+	@docker-compose -f docker-compose.db.yml up -d
+	@echo "⏳ Waiting for database to be ready..."
+	@for i in 1 2 3 4 5 6 7 8 9 10; do \
+		if docker-compose -f docker-compose.db.yml exec -T db pg_isready -U pandoragym -d pandoragym_db > /dev/null 2>&1; then \
+			echo "✅ Database is ready!"; \
+			break; \
+		fi; \
+		echo "Waiting... ($$i/10)"; \
+		sleep 3; \
+		if [ $$i -eq 10 ]; then \
+			echo "❌ Database failed to start!" && exit 1; \
+		fi; \
+	done
 	@echo "🔗 Testing database connection..."
-	@export PATH="/opt/homebrew/opt/postgresql@15/bin:$$PATH" && \
-	if psql -h localhost -p 5433 -U pandoragym -d pandoragym_db -c "SELECT 1;" > /dev/null 2>&1; then \
+	@if docker-compose -f docker-compose.db.yml exec -T db psql -U pandoragym -d pandoragym_db -c "SELECT 1;" > /dev/null 2>&1; then \
 		echo "✅ Database connection successful!"; \
 	else \
 		echo "❌ Database connection failed!"; \
@@ -201,7 +230,6 @@ local-setup:
 	@echo "  👨‍💼 Personal Trainer: carlos@pandoragym.com / 123456"
 	@echo "  🎓 Student: joao@email.com / 123456"
 
-# Database migrations using tern
 migrate-up:
 	go run ./cmd/tern
 
