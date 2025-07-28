@@ -54,3 +54,7 @@ pids
 # Temporary files
 /tmp
 /temp
+
+# Air hot reload
+tmp/
+build-errors.log

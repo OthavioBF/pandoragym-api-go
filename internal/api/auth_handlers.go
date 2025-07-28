@@ -15,7 +15,6 @@ func (api *API) AuthenticateWithPassword(w http.ResponseWriter, r *http.Request)
 		return
 	}
 
-	// Extract IP address from request
 	if req.IPAddress == nil {
 		ipAddr := ExtractIPAddress(r.RemoteAddr)
 		req.IPAddress = ipAddr

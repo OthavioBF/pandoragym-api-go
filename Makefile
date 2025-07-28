@@ -75,8 +75,8 @@ local-start:
 	else \
 		echo "⚠️  Database not found - run 'make local-setup' for first-time setup"; \
 	fi
-	@echo "🚀 Starting Go application..."
-	@nohup make run > app.log 2>&1 & echo $$! > app.pid
+	@echo "🚀 Starting Go application with hot reload..."
+	@nohup air > app.log 2>&1 & echo $$! > app.pid
 	@sleep 5
 	@echo "🔍 Testing application..."
 	@if curl -s http://localhost:3333/health > /dev/null; then \
@@ -173,8 +173,8 @@ local-setup:
 		echo "❌ Database connection failed!"; \
 		exit 1; \
 	fi
-	@echo "🚀 Starting Go application..."
-	@nohup make run > app.log 2>&1 & echo $$! > app.pid
+	@echo "🚀 Starting Go application with hot reload..."
+	@nohup air > app.log 2>&1 & echo $$! > app.pid
 	@sleep 5
 	@echo "🔍 Testing application..."
 	@if curl -s http://localhost:3333/health > /dev/null; then \
