@@ -1,4 +1,4 @@
-.PHONY: build run test clean docker-build docker-run docker-stop migrate-up migrate-down seed setup deploy-db deploy-app local-start local-stop local-restart local-status
+.PHONY: build run test clean docker-build docker-run docker-stop migrate-up migrate-down seed setup deploy-db deploy-app local-start local-stop local-restart local-status local-setup
 
 # Build the application
 build:
@@ -73,8 +73,7 @@ local-start:
 	if psql -h localhost -U pandoragym -d pandoragym_db -c "SELECT 1;" > /dev/null 2>&1; then \
 		echo "✅ Database connection successful!"; \
 	else \
-		echo "❌ Database connection failed!"; \
-		exit 1; \
+		echo "⚠️  Database not found - run 'make local-setup' for first-time setup"; \
 	fi
 	@echo "🚀 Starting Go application..."
 	@nohup make run > app.log 2>&1 & echo $$! > app.pid
@@ -84,8 +83,11 @@ local-start:
 		echo "✅ Application is running successfully!"; \
 		echo "🌐 API available at: http://localhost:3333"; \
 		echo "🗄️  Database available at: localhost:5432"; \
+		echo ""; \
+		echo "💡 Tip: If you need database setup, run 'make local-setup'"; \
 	else \
 		echo "❌ Application failed to start!"; \
+		echo "💡 Try running 'make local-setup' for complete setup"; \
 		exit 1; \
 	fi
 
@@ -127,6 +129,77 @@ local-status:
 	else \
 		echo "❌ Failed"; \
 	fi
+
+# Complete local setup (database creation + start services + migrations + seed)
+local-setup:
+	@echo "🎯 PandoraGym API - Complete Local Setup"
+	@echo "========================================"
+	@echo ""
+	@echo "📊 Starting PostgreSQL..."
+	@brew services start postgresql@15
+	@sleep 3
+	@echo "🔧 Setting up database..."
+	@export PATH="/opt/homebrew/opt/postgresql@15/bin:$$PATH" && \
+	if ! psql -h localhost -U $(shell whoami) -lqt | cut -d \| -f 1 | grep -qw pandoragym_db; then \
+		echo "📦 Creating database 'pandoragym_db'..."; \
+		createdb -h localhost -U $(shell whoami) pandoragym_db; \
+		echo "✅ Database created successfully!"; \
+	else \
+		echo "✅ Database 'pandoragym_db' already exists"; \
+	fi
+	@echo "👤 Setting up database user..."
+	@export PATH="/opt/homebrew/opt/postgresql@15/bin:$$PATH" && \
+	if ! psql -h localhost -U $(shell whoami) -d pandoragym_db -tAc "SELECT 1 FROM pg_roles WHERE rolname='pandoragym'" | grep -q 1; then \
+		echo "👤 Creating user 'pandoragym'..."; \
+		psql -h localhost -U $(shell whoami) -d pandoragym_db -c "CREATE USER pandoragym WITH PASSWORD 'password';"; \
+		echo "✅ User created successfully!"; \
+	else \
+		echo "✅ User 'pandoragym' already exists"; \
+	fi
+	@echo "🔐 Setting up database permissions..."
+	@export PATH="/opt/homebrew/opt/postgresql@15/bin:$$PATH" && \
+	psql -h localhost -U $(shell whoami) -d pandoragym_db -c "GRANT ALL PRIVILEGES ON DATABASE pandoragym_db TO pandoragym;" > /dev/null && \
+	psql -h localhost -U $(shell whoami) -d pandoragym_db -c "ALTER USER pandoragym CREATEDB;" > /dev/null && \
+	psql -h localhost -U $(shell whoami) -d pandoragym_db -c "GRANT ALL ON SCHEMA public TO pandoragym;" > /dev/null && \
+	psql -h localhost -U $(shell whoami) -d pandoragym_db -c "GRANT ALL PRIVILEGES ON ALL TABLES IN SCHEMA public TO pandoragym;" > /dev/null && \
+	psql -h localhost -U $(shell whoami) -d pandoragym_db -c "GRANT ALL PRIVILEGES ON ALL SEQUENCES IN SCHEMA public TO pandoragym;" > /dev/null && \
+	psql -h localhost -U $(shell whoami) -d pandoragym_db -c "ALTER DEFAULT PRIVILEGES IN SCHEMA public GRANT ALL ON TABLES TO pandoragym;" > /dev/null
+	@echo "✅ Database permissions configured!"
+	@echo "🔗 Testing database connection..."
+	@export PATH="/opt/homebrew/opt/postgresql@15/bin:$$PATH" && \
+	if psql -h localhost -U pandoragym -d pandoragym_db -c "SELECT 1;" > /dev/null 2>&1; then \
+		echo "✅ Database connection successful!"; \
+	else \
+		echo "❌ Database connection failed!"; \
+		exit 1; \
+	fi
+	@echo "🚀 Starting Go application..."
+	@nohup make run > app.log 2>&1 & echo $$! > app.pid
+	@sleep 5
+	@echo "🔍 Testing application..."
+	@if curl -s http://localhost:3333/health > /dev/null; then \
+		echo "✅ Application is running successfully!"; \
+	else \
+		echo "❌ Application failed to start!"; \
+		exit 1; \
+	fi
+	@echo ""
+	@echo "🔄 Running database migrations..."
+	@make migrate-up
+	@echo ""
+	@echo "🌱 Seeding database with sample data..."
+	@make seed
+	@echo ""
+	@echo "🎉 Local setup completed successfully!"
+	@echo ""
+	@echo "📋 Your PandoraGym API is ready:"
+	@echo "  🌐 API: http://localhost:3333"
+	@echo "  🗄️  Database: localhost:5432"
+	@echo "  📊 Status: make local-status"
+	@echo ""
+	@echo "🧪 Test credentials:"
+	@echo "  👨‍💼 Personal Trainer: carlos@pandoragym.com / 123456"
+	@echo "  🎓 Student: joao@email.com / 123456"
 
 # Database migrations using tern
 migrate-up:
@@ -181,6 +254,7 @@ help:
 	@echo "  local-stop       - Stop PostgreSQL and Go application"
 	@echo "  local-restart    - Restart all local services"
 	@echo "  local-status     - Check status of all local services"
+	@echo "  local-setup      - Complete setup (create DB + start + migrate + seed)"
 	@echo ""
 	@echo "🚀 Deployment:"
 	@echo "  deploy-db        - Deploy database only (Docker)"
