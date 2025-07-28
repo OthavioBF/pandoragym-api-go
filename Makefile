@@ -70,7 +70,7 @@ local-start:
 	@sleep 3
 	@echo "🔗 Testing database connection..."
 	@export PATH="/opt/homebrew/opt/postgresql@15/bin:$$PATH" && \
-	if psql -h localhost -U pandoragym -d pandoragym_db -c "SELECT 1;" > /dev/null 2>&1; then \
+	if psql -h localhost -p 5433 -U pandoragym -d pandoragym_db -c "SELECT 1;" > /dev/null 2>&1; then \
 		echo "✅ Database connection successful!"; \
 	else \
 		echo "⚠️  Database not found - run 'make local-setup' for first-time setup"; \
@@ -82,7 +82,7 @@ local-start:
 	@if curl -s http://localhost:3333/health > /dev/null; then \
 		echo "✅ Application is running successfully!"; \
 		echo "🌐 API available at: http://localhost:3333"; \
-		echo "🗄️  Database available at: localhost:5432"; \
+		echo "🗄️  Database available at: localhost:5433"; \
 		echo ""; \
 		echo "💡 Tip: If you need database setup, run 'make local-setup'"; \
 	else \
@@ -124,8 +124,8 @@ local-status:
 	fi
 	@printf "Database Connection: "
 	@export PATH="/opt/homebrew/opt/postgresql@15/bin:$$PATH" && \
-	if psql -h localhost -U pandoragym -d pandoragym_db -c "SELECT 1;" > /dev/null 2>&1; then \
-		echo "✅ Connected"; \
+	if psql -h localhost -p 5433 -U pandoragym -d pandoragym_db -c "SELECT 1;" > /dev/null 2>&1; then \
+		echo "✅ Connected (port 5433)"; \
 	else \
 		echo "❌ Failed"; \
 	fi
@@ -140,34 +140,34 @@ local-setup:
 	@sleep 3
 	@echo "🔧 Setting up database..."
 	@export PATH="/opt/homebrew/opt/postgresql@15/bin:$$PATH" && \
-	if ! psql -h localhost -U $(shell whoami) -lqt | cut -d \| -f 1 | grep -qw pandoragym_db; then \
+	if ! psql -h localhost -p 5433 -U $(shell whoami) -lqt | cut -d \| -f 1 | grep -qw pandoragym_db; then \
 		echo "📦 Creating database 'pandoragym_db'..."; \
-		createdb -h localhost -U $(shell whoami) pandoragym_db; \
+		createdb -h localhost -p 5433 -U $(shell whoami) pandoragym_db; \
 		echo "✅ Database created successfully!"; \
 	else \
 		echo "✅ Database 'pandoragym_db' already exists"; \
 	fi
 	@echo "👤 Setting up database user..."
 	@export PATH="/opt/homebrew/opt/postgresql@15/bin:$$PATH" && \
-	if ! psql -h localhost -U $(shell whoami) -d pandoragym_db -tAc "SELECT 1 FROM pg_roles WHERE rolname='pandoragym'" | grep -q 1; then \
+	if ! psql -h localhost -p 5433 -U $(shell whoami) -d pandoragym_db -tAc "SELECT 1 FROM pg_roles WHERE rolname='pandoragym'" | grep -q 1; then \
 		echo "👤 Creating user 'pandoragym'..."; \
-		psql -h localhost -U $(shell whoami) -d pandoragym_db -c "CREATE USER pandoragym WITH PASSWORD 'password';"; \
+		psql -h localhost -p 5433 -U $(shell whoami) -d pandoragym_db -c "CREATE USER pandoragym WITH PASSWORD 'password';"; \
 		echo "✅ User created successfully!"; \
 	else \
 		echo "✅ User 'pandoragym' already exists"; \
 	fi
 	@echo "🔐 Setting up database permissions..."
 	@export PATH="/opt/homebrew/opt/postgresql@15/bin:$$PATH" && \
-	psql -h localhost -U $(shell whoami) -d pandoragym_db -c "GRANT ALL PRIVILEGES ON DATABASE pandoragym_db TO pandoragym;" > /dev/null && \
-	psql -h localhost -U $(shell whoami) -d pandoragym_db -c "ALTER USER pandoragym CREATEDB;" > /dev/null && \
-	psql -h localhost -U $(shell whoami) -d pandoragym_db -c "GRANT ALL ON SCHEMA public TO pandoragym;" > /dev/null && \
-	psql -h localhost -U $(shell whoami) -d pandoragym_db -c "GRANT ALL PRIVILEGES ON ALL TABLES IN SCHEMA public TO pandoragym;" > /dev/null && \
-	psql -h localhost -U $(shell whoami) -d pandoragym_db -c "GRANT ALL PRIVILEGES ON ALL SEQUENCES IN SCHEMA public TO pandoragym;" > /dev/null && \
-	psql -h localhost -U $(shell whoami) -d pandoragym_db -c "ALTER DEFAULT PRIVILEGES IN SCHEMA public GRANT ALL ON TABLES TO pandoragym;" > /dev/null
+	psql -h localhost -p 5433 -U $(shell whoami) -d pandoragym_db -c "GRANT ALL PRIVILEGES ON DATABASE pandoragym_db TO pandoragym;" > /dev/null && \
+	psql -h localhost -p 5433 -U $(shell whoami) -d pandoragym_db -c "ALTER USER pandoragym CREATEDB;" > /dev/null && \
+	psql -h localhost -p 5433 -U $(shell whoami) -d pandoragym_db -c "GRANT ALL ON SCHEMA public TO pandoragym;" > /dev/null && \
+	psql -h localhost -p 5433 -U $(shell whoami) -d pandoragym_db -c "GRANT ALL PRIVILEGES ON ALL TABLES IN SCHEMA public TO pandoragym;" > /dev/null && \
+	psql -h localhost -p 5433 -U $(shell whoami) -d pandoragym_db -c "GRANT ALL PRIVILEGES ON ALL SEQUENCES IN SCHEMA public TO pandoragym;" > /dev/null && \
+	psql -h localhost -p 5433 -U $(shell whoami) -d pandoragym_db -c "ALTER DEFAULT PRIVILEGES IN SCHEMA public GRANT ALL ON TABLES TO pandoragym;" > /dev/null
 	@echo "✅ Database permissions configured!"
 	@echo "🔗 Testing database connection..."
 	@export PATH="/opt/homebrew/opt/postgresql@15/bin:$$PATH" && \
-	if psql -h localhost -U pandoragym -d pandoragym_db -c "SELECT 1;" > /dev/null 2>&1; then \
+	if psql -h localhost -p 5433 -U pandoragym -d pandoragym_db -c "SELECT 1;" > /dev/null 2>&1; then \
 		echo "✅ Database connection successful!"; \
 	else \
 		echo "❌ Database connection failed!"; \
@@ -194,7 +194,7 @@ local-setup:
 	@echo ""
 	@echo "📋 Your PandoraGym API is ready:"
 	@echo "  🌐 API: http://localhost:3333"
-	@echo "  🗄️  Database: localhost:5432"
+	@echo "  🗄️  Database: localhost:5433"
 	@echo "  📊 Status: make local-status"
 	@echo ""
 	@echo "🧪 Test credentials:"
