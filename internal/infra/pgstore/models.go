@@ -358,3 +358,352 @@ type UpdateSchedulingRequest struct {
 	Type      *SchedulingType `json:"type,omitempty"`
 	Notes     *string         `json:"notes,omitempty"`
 }
+type WorkoutFrequencyResponse struct {
+	TotalWorkouts   int32   `json:"total_workouts"`
+	AveragePerWeek  float64 `json:"average_per_week"`
+	MostActiveDay   string  `json:"most_active_day"`
+	LongestStreak   int32   `json:"longest_streak"`
+	CurrentStreak   int32   `json:"current_streak"`
+	TotalDuration   int32   `json:"total_duration"`
+	AverageDuration float64 `json:"average_duration"`
+}
+
+type WorkoutHistoryExerciseResponse struct {
+	WorkoutHistoryID uuid.UUID `json:"workout_history_id"`
+	WorkoutName      string    `json:"workout_name"`
+	ExerciseName     string    `json:"exercise_name"`
+	Sets             int32     `json:"sets"`
+	Reps             int32     `json:"reps"`
+	Weight           *float64  `json:"weight,omitempty"`
+	Duration         int32     `json:"duration"`
+	RestTime         *int32    `json:"rest_time,omitempty"`
+	CompletedAt      time.Time `json:"completed_at"`
+}
+
+type ExerciseProgressPoint struct {
+	Date   time.Time `json:"date"`
+	Weight *float64  `json:"weight,omitempty"`
+	Reps   int32     `json:"reps"`
+	Volume float64   `json:"volume"`
+}
+
+type ExercisePerformanceResponse struct {
+	ExerciseName      string                  `json:"exercise_name"`
+	TotalSessions     int32                   `json:"total_sessions"`
+	MaxWeight         *float64                `json:"max_weight,omitempty"`
+	MaxReps           int32                   `json:"max_reps"`
+	MaxVolume         float64                 `json:"max_volume"`
+	AverageWeight     *float64                `json:"average_weight,omitempty"`
+	AverageReps       float64                 `json:"average_reps"`
+	AverageVolume     float64                 `json:"average_volume"`
+	FirstRecorded     time.Time               `json:"first_recorded"`
+	LastRecorded      time.Time               `json:"last_recorded"`
+	ProgressData      []ExerciseProgressPoint `json:"progress_data"`
+}
+
+type UserStatisticsResponse struct {
+	TotalWorkouts        int32      `json:"total_workouts"`
+	TotalDuration        int32      `json:"total_duration"`
+	AverageDuration      float64    `json:"average_duration"`
+	FavoriteExercise     *string    `json:"favorite_exercise,omitempty"`
+	TotalSchedulings     int32      `json:"total_schedulings"`
+	CompletedSchedulings int32      `json:"completed_schedulings"`
+	CancelledSchedulings int32      `json:"cancelled_schedulings"`
+	JoinDate             time.Time  `json:"join_date"`
+	LastActivity         *time.Time `json:"last_activity,omitempty"`
+	CurrentStreak        int32      `json:"current_streak"`
+	LongestStreak        int32      `json:"longest_streak"`
+}
+
+type PlatformStatisticsResponse struct {
+	TotalUsers           int32   `json:"total_users"`
+	TotalStudents        int32   `json:"total_students"`
+	TotalTrainers        int32   `json:"total_trainers"`
+	ActiveUsers          int32   `json:"active_users"`
+	NewUsersThisMonth    int32   `json:"new_users_this_month"`
+	TotalWorkouts        int32   `json:"total_workouts"`
+	TotalExercises       int32   `json:"total_exercises"`
+	WorkoutsThisMonth    int32   `json:"workouts_this_month"`
+	TotalSchedulings     int32   `json:"total_schedulings"`
+	CompletedSchedulings int32   `json:"completed_schedulings"`
+	SchedulingsThisMonth int32   `json:"schedulings_this_month"`
+	Revenue              float64 `json:"revenue"`
+	RevenueThisMonth     float64 `json:"revenue_this_month"`
+}
+
+type DailySignupData struct {
+	Date     time.Time `json:"date"`
+	Students int32     `json:"students"`
+	Trainers int32     `json:"trainers"`
+	Total    int32     `json:"total"`
+}
+
+type UserReportResponse struct {
+	TotalUsers      int32             `json:"total_users"`
+	NewUsers        int32             `json:"new_users"`
+	ActiveUsers     int32             `json:"active_users"`
+	ChurnRate       float64           `json:"churn_rate"`
+	RetentionRate   float64           `json:"retention_rate"`
+	DailySignupData []DailySignupData `json:"daily_signup_data"`
+}
+
+type PopularExerciseData struct {
+	ExerciseName string `json:"exercise_name"`
+	UsageCount   int32  `json:"usage_count"`
+	Category     string `json:"category"`
+}
+
+type WorkoutReportResponse struct {
+	TotalWorkouts     int32                 `json:"total_workouts"`
+	CompletedWorkouts int32                 `json:"completed_workouts"`
+	AverageDuration   float64               `json:"average_duration"`
+	TotalDuration     int32                 `json:"total_duration"`
+	PopularExercises  []PopularExerciseData `json:"popular_exercises"`
+}
+
+type SchedulingReportResponse struct {
+	TotalSchedulings     int32   `json:"total_schedulings"`
+	CompletedSchedulings int32   `json:"completed_schedulings"`
+	CancelledSchedulings int32   `json:"cancelled_schedulings"`
+	PendingSchedulings   int32   `json:"pending_schedulings"`
+	CompletionRate       float64 `json:"completion_rate"`
+	CancellationRate     float64 `json:"cancellation_rate"`
+	AverageLeadTime      float64 `json:"average_lead_time"`
+}
+
+type DailyRevenueData struct {
+	Date    time.Time `json:"date"`
+	Revenue float64   `json:"revenue"`
+}
+
+type RevenueReportResponse struct {
+	TotalRevenue     float64            `json:"total_revenue"`
+	AverageRevenue   float64            `json:"average_revenue"`
+	RevenueGrowth    float64            `json:"revenue_growth"`
+	DailyRevenueData []DailyRevenueData `json:"daily_revenue_data"`
+}
+
+type TopTrainerData struct {
+	TrainerName       string  `json:"trainer_name"`
+	TotalSchedulings  int32   `json:"total_schedulings"`
+	CompletedSessions int32   `json:"completed_sessions"`
+	Rating            float64 `json:"rating"`
+	Revenue           float64 `json:"revenue"`
+}
+
+type TrainerReportResponse struct {
+	TotalTrainers  int32            `json:"total_trainers"`
+	ActiveTrainers int32            `json:"active_trainers"`
+	AverageRating  float64          `json:"average_rating"`
+	TotalSessions  int32            `json:"total_sessions"`
+	TopTrainers    []TopTrainerData `json:"top_trainers"`
+}
+
+type WorkoutTrendPoint struct {
+	Date            time.Time `json:"date"`
+	WorkoutCount    int32     `json:"workout_count"`
+	TotalDuration   int32     `json:"total_duration"`
+	AverageDuration float64   `json:"average_duration"`
+}
+
+type WorkoutTrendsResponse struct {
+	Period    string              `json:"period"`
+	StartDate time.Time           `json:"start_date"`
+	EndDate   time.Time           `json:"end_date"`
+	TrendData []WorkoutTrendPoint `json:"trend_data"`
+}
+
+type MuscleGroupData struct {
+	MuscleGroup   string     `json:"muscle_group"`
+	WorkoutCount  int32      `json:"workout_count"`
+	ExerciseCount int32      `json:"exercise_count"`
+	TotalVolume   float64    `json:"total_volume"`
+	LastWorked    *time.Time `json:"last_worked,omitempty"`
+}
+
+type MuscleGroupAnalysisResponse struct {
+	MuscleGroups []MuscleGroupData `json:"muscle_groups"`
+}
+type PersonalTrainerResponse struct {
+	ID             uuid.UUID `json:"id"`
+	Name           string    `json:"name"`
+	Email          string    `json:"email"`
+	Phone          string    `json:"phone"`
+	AvatarURL      *string   `json:"avatar_url,omitempty"`
+	Description    *string   `json:"description,omitempty"`
+	VideoURL       *string   `json:"video_url,omitempty"`
+	Experience     *string   `json:"experience,omitempty"`
+	Specialization *string   `json:"specialization,omitempty"`
+	Qualifications *string   `json:"qualifications,omitempty"`
+	Rating         *float64  `json:"rating,omitempty"`
+	ReviewCount    int32     `json:"review_count"`
+}
+
+type TrainerCommentResponse struct {
+	ID          uuid.UUID `json:"id"`
+	StudentName string    `json:"student_name"`
+	Comment     string    `json:"comment"`
+	Rating      int32     `json:"rating"`
+	CreatedAt   time.Time `json:"created_at"`
+}
+
+type StudentResponse struct {
+	ID                    uuid.UUID `json:"id"`
+	Name                  string    `json:"name"`
+	Email                 string    `json:"email"`
+	Phone                 string    `json:"phone"`
+	AvatarURL             *string   `json:"avatar_url,omitempty"`
+	BornDate              time.Time `json:"born_date"`
+	Age                   int32     `json:"age"`
+	Weight                float64   `json:"weight"`
+	Objective             string    `json:"objective"`
+	TrainingFrequency     string    `json:"training_frequency"`
+	DidBodybuilding       bool      `json:"did_bodybuilding"`
+	MedicalCondition      *string   `json:"medical_condition,omitempty"`
+	PhysicalActivityLevel *string   `json:"physical_activity_level,omitempty"`
+	Observations          *string   `json:"observations,omitempty"`
+}
+
+type SubscriptionStatus string
+
+const (
+	SubscriptionStatusPending   SubscriptionStatus = "PENDING"
+	SubscriptionStatusActive    SubscriptionStatus = "ACTIVE"
+	SubscriptionStatusCancelled SubscriptionStatus = "CANCELLED"
+	SubscriptionStatusExpired   SubscriptionStatus = "EXPIRED"
+)
+
+type PaymentStatus string
+
+const (
+	PaymentStatusPending   PaymentStatus = "PENDING"
+	PaymentStatusCompleted PaymentStatus = "COMPLETED"
+	PaymentStatusFailed    PaymentStatus = "FAILED"
+	PaymentStatusRefunded  PaymentStatus = "REFUNDED"
+)
+
+type UserStatus string
+
+const (
+	UserStatusActive    UserStatus = "ACTIVE"
+	UserStatusSuspended UserStatus = "SUSPENDED"
+	UserStatusBanned    UserStatus = "BANNED"
+)
+
+type WorkoutHistoryResponse struct {
+	ID          uuid.UUID `json:"id"`
+	WorkoutName string    `json:"workout_name"`
+	Duration    int32     `json:"duration"`
+	Notes       *string   `json:"notes,omitempty"`
+	CreatedAt   time.Time `json:"created_at"`
+}
+
+type ExerciseTemplateResponse struct {
+	ID           uuid.UUID `json:"id"`
+	Name         string    `json:"name"`
+	Description  string    `json:"description"`
+	VideoURL     string    `json:"video_url"`
+	Instructions string    `json:"instructions"`
+	Category     string    `json:"category"`
+	MuscleGroups []string  `json:"muscle_groups"`
+	Equipment    []string  `json:"equipment"`
+	Difficulty   string    `json:"difficulty"`
+}
+
+type WorkoutTemplateResponse struct {
+	ID          uuid.UUID `json:"id"`
+	Name        string    `json:"name"`
+	Description string    `json:"description"`
+	Thumbnail   string    `json:"thumbnail"`
+	Category    string    `json:"category"`
+	Difficulty  string    `json:"difficulty"`
+	Duration    int32     `json:"duration"`
+	WeekDays    []string  `json:"week_days"`
+	Tags        []string  `json:"tags"`
+}
+
+type TrainingProgramResponse struct {
+	ID          uuid.UUID `json:"id"`
+	Name        string    `json:"name"`
+	Description string    `json:"description"`
+	Thumbnail   string    `json:"thumbnail"`
+	Category    string    `json:"category"`
+	Difficulty  string    `json:"difficulty"`
+	Duration    int32     `json:"duration"`
+	IsFree      bool      `json:"is_free"`
+	Price       *float64  `json:"price,omitempty"`
+}
+
+type AvailabilitySlot struct {
+	StartTime time.Time `json:"start_time"`
+	EndTime   time.Time `json:"end_time"`
+	Available bool      `json:"available"`
+}
+
+type SchedulingHistoryResponse struct {
+	ID            uuid.UUID        `json:"id"`
+	Date          time.Time        `json:"date"`
+	Type          SchedulingType   `json:"type"`
+	Status        SchedulingStatus `json:"status"`
+	WorkoutName   *string          `json:"workout_name,omitempty"`
+	PartnerName   string           `json:"partner_name"`
+	CompletedAt   *time.Time       `json:"completed_at,omitempty"`
+}
+
+type PlanResponse struct {
+	ID              uuid.UUID `json:"id"`
+	TrainerID       uuid.UUID `json:"trainer_id"`
+	TrainerName     string    `json:"trainer_name,omitempty"`
+	Name            string    `json:"name"`
+	Description     string    `json:"description"`
+	Price           float64   `json:"price"`
+	Duration        int32     `json:"duration"`
+	Features        []string  `json:"features"`
+	IsActive        bool      `json:"is_active"`
+	SubscriberCount int32     `json:"subscriber_count"`
+	CreatedAt       time.Time `json:"created_at"`
+	UpdatedAt       time.Time `json:"updated_at"`
+}
+
+type SubscriptionResponse struct {
+	ID        uuid.UUID          `json:"id"`
+	UserID    uuid.UUID          `json:"user_id"`
+	PlanID    uuid.UUID          `json:"plan_id"`
+	PlanName  string             `json:"plan_name"`
+	StartDate time.Time          `json:"start_date"`
+	EndDate   time.Time          `json:"end_date"`
+	Status    SubscriptionStatus `json:"status"`
+	CreatedAt time.Time          `json:"created_at"`
+	UpdatedAt time.Time          `json:"updated_at"`
+}
+
+type SubscriptionHistoryResponse struct {
+	ID          uuid.UUID          `json:"id"`
+	PlanName    string             `json:"plan_name"`
+	TrainerName string             `json:"trainer_name"`
+	StartDate   time.Time          `json:"start_date"`
+	EndDate     time.Time          `json:"end_date"`
+	Status      SubscriptionStatus `json:"status"`
+	Amount      float64            `json:"amount"`
+	CreatedAt   time.Time          `json:"created_at"`
+}
+
+type SubscriberResponse struct {
+	UserID       uuid.UUID          `json:"user_id"`
+	UserName     string             `json:"user_name"`
+	UserEmail    string             `json:"user_email"`
+	StartDate    time.Time          `json:"start_date"`
+	EndDate      time.Time          `json:"end_date"`
+	Status       SubscriptionStatus `json:"status"`
+	SubscribedAt time.Time          `json:"subscribed_at"`
+}
+
+type PlanRevenueResponse struct {
+	PlanID            uuid.UUID `json:"plan_id"`
+	PlanName          string    `json:"plan_name"`
+	TotalRevenue      float64   `json:"total_revenue"`
+	MonthlyRevenue    float64   `json:"monthly_revenue"`
+	ActiveSubscribers int32     `json:"active_subscribers"`
+	TotalSubscribers  int32     `json:"total_subscribers"`
+	AverageRevenue    float64   `json:"average_revenue"`
+}

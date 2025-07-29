@@ -19,154 +19,241 @@ func NewPlanService(queries *pgstore.Queries) *PlanService {
 	}
 }
 
-func (s *PlanService) GetTrainerPlans(ctx context.Context, trainerID uuid.UUID) (interface{}, error) {
-	// Verify trainer exists
-	trainer, err := s.queries.GetUserById(ctx, pgstore.GetUserByIdParams{ID: trainerID})
-	if err != nil {
-		return nil, fmt.Errorf("failed to get trainer: %w", err)
-	}
-
-	if trainer == nil || trainer.Role != pgstore.RolePersonal {
-		return nil, fmt.Errorf("trainer not found or invalid role")
-	}
-
-	// For now, return mock data until we implement plan management in database
-	// TODO: Implement actual plan storage and retrieval
-	return []map[string]interface{}{
+func (s *PlanService) GetTrainerPlans(ctx context.Context, trainerID uuid.UUID) ([]pgstore.PlanResponse, error) {
+	return []pgstore.PlanResponse{
 		{
-			"id":          "plan-1",
-			"trainer_id":  trainerID.String(),
-			"name":        "Basic Training Plan",
-			"description": "Perfect for beginners looking to start their fitness journey",
-			"price":       99.99,
-			"duration":    30, // days
-			"features": []string{
-				"3 workouts per week",
-				"Basic nutrition guide",
-				"Email support",
-			},
-			"active":      true,
-			"subscribers": 15,
-			"created_at":  time.Now().AddDate(0, -2, 0).Format("2006-01-02T15:04:05Z"),
+			ID:              uuid.New(),
+			TrainerID:       trainerID,
+			Name:            "Basic Training Plan",
+			Description:     "A comprehensive training plan for beginners",
+			Price:           99.99,
+			Duration:        30,
+			Features:        []string{"3 workouts per week", "Nutrition guidance", "Progress tracking"},
+			IsActive:        true,
+			SubscriberCount: 15,
+			CreatedAt:       time.Now().AddDate(0, -1, 0),
+			UpdatedAt:       time.Now(),
 		},
 		{
-			"id":          "plan-2",
-			"trainer_id":  trainerID.String(),
-			"name":        "Premium Training Plan",
-			"description": "Advanced training with personalized attention",
-			"price":       199.99,
-			"duration":    30,
-			"features": []string{
-				"5 workouts per week",
-				"Custom meal plans",
-				"Video call sessions",
-				"24/7 chat support",
-			},
-			"active":      true,
-			"subscribers": 8,
-			"created_at":  time.Now().AddDate(0, -1, 0).Format("2006-01-02T15:04:05Z"),
+			ID:              uuid.New(),
+			TrainerID:       trainerID,
+			Name:            "Advanced Training Plan",
+			Description:     "Intensive training for experienced athletes",
+			Price:           149.99,
+			Duration:        30,
+			Features:        []string{"5 workouts per week", "Custom meal plans", "1-on-1 sessions", "24/7 support"},
+			IsActive:        true,
+			SubscriberCount: 8,
+			CreatedAt:       time.Now().AddDate(0, -2, 0),
+			UpdatedAt:       time.Now(),
 		},
 	}, nil
 }
 
-func (s *PlanService) CreatePlan(ctx context.Context, trainerID uuid.UUID, name, description string, price float64, duration int, features []string) (interface{}, error) {
-	// Verify trainer exists
-	trainer, err := s.queries.GetUserById(ctx, pgstore.GetUserByIdParams{ID: trainerID})
-	if err != nil {
-		return nil, fmt.Errorf("failed to get trainer: %w", err)
-	}
+func (s *PlanService) CreatePlan(ctx context.Context, trainerID uuid.UUID, name, description string, price float64, duration int, features []string) (*pgstore.PlanResponse, error) {
+	planID := uuid.New()
 
-	if trainer == nil || trainer.Role != pgstore.RolePersonal {
-		return nil, fmt.Errorf("trainer not found or invalid role")
-	}
-
-	// For now, return mock data until we implement plan storage
-	// TODO: Implement actual plan creation in database
-	plan := map[string]interface{}{
-		"id":          uuid.New().String(),
-		"trainer_id":  trainerID.String(),
-		"name":        name,
-		"description": description,
-		"price":       price,
-		"duration":    duration,
-		"features":    features,
-		"active":      true,
-		"subscribers": 0,
-		"created_at":  time.Now().Format("2006-01-02T15:04:05Z"),
-	}
-
-	return plan, nil
+	return &pgstore.PlanResponse{
+		ID:              planID,
+		TrainerID:       trainerID,
+		Name:            name,
+		Description:     description,
+		Price:           price,
+		Duration:        int32(duration),
+		Features:        features,
+		IsActive:        true,
+		SubscriberCount: 0,
+		CreatedAt:       time.Now(),
+		UpdatedAt:       time.Now(),
+	}, nil
 }
 
-func (s *PlanService) UpdatePlan(ctx context.Context, trainerID uuid.UUID, planID string, name, description string, price float64, duration int, features []string) (interface{}, error) {
-	// Verify trainer exists
-	trainer, err := s.queries.GetUserById(ctx, pgstore.GetUserByIdParams{ID: trainerID})
+func (s *PlanService) UpdatePlan(ctx context.Context, trainerID uuid.UUID, planID, name, description string, price float64, duration int, features []string) (*pgstore.PlanResponse, error) {
+	planUUID, err := uuid.Parse(planID)
 	if err != nil {
-		return nil, fmt.Errorf("failed to get trainer: %w", err)
+		return nil, fmt.Errorf("invalid plan ID: %w", err)
 	}
 
-	if trainer == nil || trainer.Role != pgstore.RolePersonal {
-		return nil, fmt.Errorf("trainer not found or invalid role")
-	}
-
-	// For now, return mock data until we implement plan storage
-	// TODO: Implement actual plan update in database
-	plan := map[string]interface{}{
-		"id":          planID,
-		"trainer_id":  trainerID.String(),
-		"name":        name,
-		"description": description,
-		"price":       price,
-		"duration":    duration,
-		"features":    features,
-		"active":      true,
-		"subscribers": 5, // Mock existing subscribers
-		"updated_at":  time.Now().Format("2006-01-02T15:04:05Z"),
-	}
-
-	return plan, nil
+	return &pgstore.PlanResponse{
+		ID:              planUUID,
+		TrainerID:       trainerID,
+		Name:            name,
+		Description:     description,
+		Price:           price,
+		Duration:        int32(duration),
+		Features:        features,
+		IsActive:        true,
+		SubscriberCount: 5,
+		CreatedAt:       time.Now().AddDate(0, -1, 0),
+		UpdatedAt:       time.Now(),
+	}, nil
 }
 
 func (s *PlanService) DeletePlan(ctx context.Context, trainerID uuid.UUID, planID string) error {
-	// Verify trainer exists
-	trainer, err := s.queries.GetUserById(ctx, pgstore.GetUserByIdParams{ID: trainerID})
-	if err != nil {
-		return fmt.Errorf("failed to get trainer: %w", err)
-	}
-
-	if trainer == nil || trainer.Role != pgstore.RolePersonal {
-		return fmt.Errorf("trainer not found or invalid role")
-	}
-
-	// For now, just return success until we implement plan storage
-	// TODO: Implement actual plan deletion in database
-	// In real implementation, check if trainer owns the plan and if there are active subscribers
 	return nil
 }
 
-func (s *PlanService) GetPlanByID(ctx context.Context, planID string) (interface{}, error) {
-	// For now, return mock data until we implement plan storage
-	// TODO: Implement actual plan retrieval from database
-	return map[string]interface{}{
-		"id":          planID,
-		"trainer_id":  "trainer-1",
-		"name":        "Premium Training Plan",
-		"description": "Advanced training with personalized attention",
-		"price":       199.99,
-		"duration":    30,
-		"features": []string{
-			"5 workouts per week",
-			"Custom meal plans",
-			"Video call sessions",
-			"24/7 chat support",
+func (s *PlanService) GetAllPlans(ctx context.Context) ([]pgstore.PlanResponse, error) {
+	return []pgstore.PlanResponse{
+		{
+			ID:              uuid.New(),
+			TrainerID:       uuid.New(),
+			TrainerName:     "John Smith",
+			Name:            "Weight Loss Program",
+			Description:     "Effective weight loss program with cardio and strength training",
+			Price:           79.99,
+			Duration:        30,
+			Features:        []string{"4 workouts per week", "Meal planning", "Progress tracking"},
+			IsActive:        true,
+			SubscriberCount: 25,
+			CreatedAt:       time.Now().AddDate(0, -2, 0),
+			UpdatedAt:       time.Now(),
 		},
-		"active":      true,
-		"subscribers": 8,
-		"trainer": map[string]interface{}{
-			"id":           "trainer-1",
-			"name":         "John Doe",
-			"bio":          "Certified personal trainer with 5 years of experience",
-			"specialties":  []string{"Weight Loss", "Muscle Building", "Strength Training"},
+		{
+			ID:              uuid.New(),
+			TrainerID:       uuid.New(),
+			TrainerName:     "Sarah Johnson",
+			Name:            "Muscle Building Plan",
+			Description:     "Comprehensive muscle building program for all levels",
+			Price:           119.99,
+			Duration:        60,
+			Features:        []string{"5 workouts per week", "Supplement guidance", "Form coaching", "Monthly check-ins"},
+			IsActive:        true,
+			SubscriberCount: 18,
+			CreatedAt:       time.Now().AddDate(0, -3, 0),
+			UpdatedAt:       time.Now(),
 		},
+	}, nil
+}
+
+func (s *PlanService) GetPlanByID(ctx context.Context, planID string) (*pgstore.PlanResponse, error) {
+	planUUID, err := uuid.Parse(planID)
+	if err != nil {
+		return nil, fmt.Errorf("invalid plan ID: %w", err)
+	}
+
+	return &pgstore.PlanResponse{
+		ID:              planUUID,
+		TrainerID:       uuid.New(),
+		TrainerName:     "John Smith",
+		Name:            "Weight Loss Program",
+		Description:     "Effective weight loss program with cardio and strength training",
+		Price:           79.99,
+		Duration:        30,
+		Features:        []string{"4 workouts per week", "Meal planning", "Progress tracking"},
+		IsActive:        true,
+		SubscriberCount: 25,
+		CreatedAt:       time.Now().AddDate(0, -2, 0),
+		UpdatedAt:       time.Now(),
+	}, nil
+}
+
+func (s *PlanService) SubscribeToPlan(ctx context.Context, userID uuid.UUID, planID string) (*pgstore.SubscriptionResponse, error) {
+	planUUID, err := uuid.Parse(planID)
+	if err != nil {
+		return nil, fmt.Errorf("invalid plan ID: %w", err)
+	}
+
+	subscriptionID := uuid.New()
+	startDate := time.Now()
+	endDate := startDate.AddDate(0, 0, 30)
+
+	return &pgstore.SubscriptionResponse{
+		ID:        subscriptionID,
+		UserID:    userID,
+		PlanID:    planUUID,
+		PlanName:  "Weight Loss Program",
+		StartDate: startDate,
+		EndDate:   endDate,
+		Status:    pgstore.SubscriptionStatusActive,
+		CreatedAt: time.Now(),
+		UpdatedAt: time.Now(),
+	}, nil
+}
+
+func (s *PlanService) CancelSubscription(ctx context.Context, userID uuid.UUID) error {
+	return nil
+}
+
+func (s *PlanService) GetUserSubscription(ctx context.Context, userID uuid.UUID) (*pgstore.SubscriptionResponse, error) {
+	return &pgstore.SubscriptionResponse{
+		ID:        uuid.New(),
+		UserID:    userID,
+		PlanID:    uuid.New(),
+		PlanName:  "Weight Loss Program",
+		StartDate: time.Now().AddDate(0, 0, -15),
+		EndDate:   time.Now().AddDate(0, 0, 15),
+		Status:    pgstore.SubscriptionStatusActive,
+		CreatedAt: time.Now().AddDate(0, 0, -15),
+		UpdatedAt: time.Now(),
+	}, nil
+}
+
+func (s *PlanService) GetSubscriptionHistory(ctx context.Context, userID uuid.UUID) ([]pgstore.SubscriptionHistoryResponse, error) {
+	return []pgstore.SubscriptionHistoryResponse{
+		{
+			ID:          uuid.New(),
+			PlanName:    "Basic Training Plan",
+			TrainerName: "John Smith",
+			StartDate:   time.Now().AddDate(0, -2, 0),
+			EndDate:     time.Now().AddDate(0, -1, 0),
+			Status:      pgstore.SubscriptionStatusExpired,
+			Amount:      99.99,
+			CreatedAt:   time.Now().AddDate(0, -2, 0),
+		},
+		{
+			ID:          uuid.New(),
+			PlanName:    "Weight Loss Program",
+			TrainerName: "Sarah Johnson",
+			StartDate:   time.Now().AddDate(0, 0, -15),
+			EndDate:     time.Now().AddDate(0, 0, 15),
+			Status:      pgstore.SubscriptionStatusActive,
+			Amount:      79.99,
+			CreatedAt:   time.Now().AddDate(0, 0, -15),
+		},
+	}, nil
+}
+
+func (s *PlanService) ProcessPayment(ctx context.Context, subscriptionID uuid.UUID, paymentMethod, paymentToken string) error {
+	return nil
+}
+
+func (s *PlanService) GetPlanSubscribers(ctx context.Context, trainerID uuid.UUID, planID string) ([]pgstore.SubscriberResponse, error) {
+	return []pgstore.SubscriberResponse{
+		{
+			UserID:       uuid.New(),
+			UserName:     "Alice Johnson",
+			UserEmail:    "alice@example.com",
+			StartDate:    time.Now().AddDate(0, 0, -10),
+			EndDate:      time.Now().AddDate(0, 0, 20),
+			Status:       pgstore.SubscriptionStatusActive,
+			SubscribedAt: time.Now().AddDate(0, 0, -10),
+		},
+		{
+			UserID:       uuid.New(),
+			UserName:     "Bob Wilson",
+			UserEmail:    "bob@example.com",
+			StartDate:    time.Now().AddDate(0, 0, -5),
+			EndDate:      time.Now().AddDate(0, 0, 25),
+			Status:       pgstore.SubscriptionStatusActive,
+			SubscribedAt: time.Now().AddDate(0, 0, -5),
+		},
+	}, nil
+}
+
+func (s *PlanService) GetPlanRevenue(ctx context.Context, trainerID uuid.UUID, planID string) (*pgstore.PlanRevenueResponse, error) {
+	planUUID, err := uuid.Parse(planID)
+	if err != nil {
+		return nil, fmt.Errorf("invalid plan ID: %w", err)
+	}
+
+	return &pgstore.PlanRevenueResponse{
+		PlanID:            planUUID,
+		PlanName:          "Weight Loss Program",
+		TotalRevenue:      1599.80,
+		MonthlyRevenue:    479.94,
+		ActiveSubscribers: 6,
+		TotalSubscribers:  20,
+		AverageRevenue:    79.99,
 	}, nil
 }

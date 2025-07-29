@@ -17,7 +17,7 @@ var emailRegex = regexp.MustCompile(`^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]
 // DecodeValidJSON decodes JSON from request body and validates the struct
 func DecodeValidJSON[T any](r *http.Request) (T, error) {
 	var data T
-	
+
 	if err := json.NewDecoder(r.Body).Decode(&data); err != nil {
 		return data, fmt.Errorf("decode json: %w", err)
 	}
@@ -32,7 +32,7 @@ func DecodeValidJSON[T any](r *http.Request) (T, error) {
 // DecodeValidJSONWithDetails decodes JSON and returns detailed validation errors
 func DecodeValidJSONWithDetails[T any](r *http.Request) (T, map[string]string, error) {
 	var data T
-	
+
 	if err := json.NewDecoder(r.Body).Decode(&data); err != nil {
 		return data, nil, fmt.Errorf("decode json: %w", err)
 	}
@@ -49,12 +49,12 @@ func ParseUUID(uuidStr, fieldName string) (uuid.UUID, error) {
 	if uuidStr == "" {
 		return uuid.Nil, fmt.Errorf("%s is required", fieldName)
 	}
-	
+
 	parsedUUID, err := uuid.Parse(uuidStr)
 	if err != nil {
 		return uuid.Nil, fmt.Errorf("invalid %s format", fieldName)
 	}
-	
+
 	return parsedUUID, nil
 }
 
@@ -211,10 +211,9 @@ func IsValidImageType(contentType string) bool {
 		"image/webp",
 	}
 
-	for _, validType := range validTypes {
-		if contentType == validType {
-			return true
-		}
+	if slices.Contains(validTypes, contentType) {
+		return true
 	}
+
 	return false
 }

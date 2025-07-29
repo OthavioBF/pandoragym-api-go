@@ -18,14 +18,17 @@ func (api *API) AuthenticateWithPassword(w http.ResponseWriter, r *http.Request)
 		return
 	}
 
-	// For now, return mock response
-	// TODO: Implement actual authentication
-	api.Logger.Info("Authentication requested", "email", req.Email)
+	tokens, user, err := api.AuthService.AuthenticateWithPassword(r.Context(), req.Email, req.Password)
+	if err != nil {
+		api.Logger.Error("Authentication failed", "error", err, "email", req.Email)
+		utils.WriteErrorResponse(w, http.StatusUnauthorized, "Invalid credentials")
+		return
+	}
 
-	utils.WriteJSONResponse(w, http.StatusOK, map[string]string{
-		"message":       "Authentication not fully implemented yet",
-		"access_token":  "mock-access-token",
-		"refresh_token": "mock-refresh-token",
+	utils.WriteJSONResponse(w, http.StatusOK, map[string]interface{}{
+		"access_token":  tokens.AccessToken,
+		"refresh_token": tokens.RefreshToken,
+		"user":          user,
 	})
 }
 
@@ -64,26 +67,85 @@ func (api *API) CreatePersonalAccount(w http.ResponseWriter, r *http.Request) {
 }
 
 func (api *API) PasswordRecover(w http.ResponseWriter, r *http.Request) {
+	req, err := utils.DecodeValidJSON[struct {
+		Email string `json:"email" validate:"required,email"`
+	}](r)
+	if err != nil {
+		utils.WriteErrorResponse(w, http.StatusBadRequest, err.Error())
+		return
+	}
+
+	err = api.AuthService.InitiatePasswordRecovery(r.Context(), req.Email)
+	if err != nil {
+		api.Logger.Error("Password recovery failed", "error", err, "email", req.Email)
+		utils.WriteErrorResponse(w, http.StatusInternalServerError, "Failed to initiate password recovery")
+		return
+	}
+
 	utils.WriteJSONResponse(w, http.StatusOK, map[string]string{
-		"message": "Password recovery not implemented yet",
+		"message": "Password recovery email sent",
 	})
 }
 
 func (api *API) ResetPassword(w http.ResponseWriter, r *http.Request) {
+	req, err := utils.DecodeValidJSON[struct {
+		Token       string `json:"token" validate:"required"`
+		NewPassword string `json:"new_password" validate:"required,min=6"`
+	}](r)
+	if err != nil {
+		utils.WriteErrorResponse(w, http.StatusBadRequest, err.Error())
+		return
+	}
+
+	err = api.AuthService.ResetPassword(r.Context(), req.Token, req.NewPassword)
+	if err != nil {
+		api.Logger.Error("Password reset failed", "error", err)
+		utils.WriteErrorResponse(w, http.StatusBadRequest, "Invalid or expired reset token")
+		return
+	}
+
 	utils.WriteJSONResponse(w, http.StatusOK, map[string]string{
-		"message": "Password reset not implemented yet",
+		"message": "Password reset successfully",
 	})
 }
 
 func (api *API) RefreshToken(w http.ResponseWriter, r *http.Request) {
-	utils.WriteJSONResponse(w, http.StatusOK, map[string]string{
-		"message": "Token refresh not implemented yet",
-	})
+	req, err := utils.DecodeValidJSON[struct {
+		RefreshToken string `json:"refresh_token" validate:"required"`
+	}](r)
+	if err != nil {
+		utils.WriteErrorResponse(w, http.StatusBadRequest, err.Error())
+		return
+	}
+
+	tokens, err := api.AuthService.RefreshToken(r.Context(), req.RefreshToken)
+	if err != nil {
+		api.Logger.Error("Token refresh failed", "error", err)
+		utils.WriteErrorResponse(w, http.StatusUnauthorized, "Invalid refresh token")
+		return
+	}
+
+	utils.WriteJSONResponse(w, http.StatusOK, tokens)
 }
 
 func (api *API) RevokeToken(w http.ResponseWriter, r *http.Request) {
+	req, err := utils.DecodeValidJSON[struct {
+		RefreshToken string `json:"refresh_token" validate:"required"`
+	}](r)
+	if err != nil {
+		utils.WriteErrorResponse(w, http.StatusBadRequest, err.Error())
+		return
+	}
+
+	err = api.AuthService.RevokeToken(r.Context(), req.RefreshToken)
+	if err != nil {
+		api.Logger.Error("Token revocation failed", "error", err)
+		utils.WriteErrorResponse(w, http.StatusBadRequest, "Failed to revoke token")
+		return
+	}
+
 	utils.WriteJSONResponse(w, http.StatusOK, map[string]string{
-		"message": "Token revocation not implemented yet",
+		"message": "Token revoked successfully",
 	})
 }
 
@@ -199,20 +261,34 @@ func (api *API) UploadFile(w http.ResponseWriter, r *http.Request) {
 // Personal trainer discovery and interaction
 
 func (api *API) GetPersonalTrainersList(w http.ResponseWriter, r *http.Request) {
-	// For now, return empty array
-	// TODO: Implement actual trainer retrieval
+	trainers, err := api.UserService.GetPersonalTrainers(r.Context())
+	if err != nil {
+		api.Logger.Error("Failed to get personal trainers", "error", err)
+		utils.WriteErrorResponse(w, http.StatusInternalServerError, "Failed to get personal trainers")
+		return
+	}
+
 	utils.WriteJSONResponse(w, http.StatusOK, map[string]interface{}{
-		"trainers": []interface{}{},
+		"trainers": trainers,
 	})
 }
 
 func (api *API) GetPersonalTrainerByID(w http.ResponseWriter, r *http.Request) {
-	trainerID := chi.URLParam(r, "id")
+	trainerIDStr := chi.URLParam(r, "id")
+	trainerID, err := uuid.Parse(trainerIDStr)
+	if err != nil {
+		utils.WriteErrorResponse(w, http.StatusBadRequest, "Invalid trainer ID")
+		return
+	}
 
-	// For now, return not found
-	// TODO: Implement actual trainer retrieval
-	api.Logger.Info("Personal trainer requested", "trainer_id", trainerID)
-	utils.WriteErrorResponse(w, http.StatusNotFound, "Personal trainer not found")
+	trainer, err := api.UserService.GetPersonalTrainerByID(r.Context(), trainerID)
+	if err != nil {
+		api.Logger.Error("Failed to get personal trainer", "error", err, "trainer_id", trainerID)
+		utils.WriteErrorResponse(w, http.StatusNotFound, "Personal trainer not found")
+		return
+	}
+
+	utils.WriteJSONResponse(w, http.StatusOK, trainer)
 }
 
 func (api *API) AddPersonalTrainerComment(w http.ResponseWriter, r *http.Request) {
@@ -222,20 +298,28 @@ func (api *API) AddPersonalTrainerComment(w http.ResponseWriter, r *http.Request
 		return
 	}
 
-	trainerID := chi.URLParam(r, "id")
+	trainerIDStr := chi.URLParam(r, "id")
+	trainerID, err := uuid.Parse(trainerIDStr)
+	if err != nil {
+		utils.WriteErrorResponse(w, http.StatusBadRequest, "Invalid trainer ID")
+		return
+	}
 
 	req, err := utils.DecodeValidJSON[struct {
-		Comment string `json:"comment"`
-		Rating  int    `json:"rating"`
+		Comment string `json:"comment" validate:"required,min=10,max=500"`
+		Rating  int    `json:"rating" validate:"required,min=1,max=5"`
 	}](r)
 	if err != nil {
 		utils.WriteErrorResponse(w, http.StatusBadRequest, err.Error())
 		return
 	}
 
-	// For now, just return success
-	// TODO: Implement actual comment addition
-	api.Logger.Info("Trainer comment requested", "trainer_id", trainerID, "user_id", userID, "rating", req.Rating)
+	err = api.UserService.AddTrainerComment(r.Context(), trainerID, userID, req.Comment, req.Rating)
+	if err != nil {
+		api.Logger.Error("Failed to add trainer comment", "error", err, "trainer_id", trainerID, "user_id", userID)
+		utils.WriteErrorResponse(w, http.StatusInternalServerError, "Failed to add comment")
+		return
+	}
 
 	utils.WriteJSONResponse(w, http.StatusOK, map[string]string{
 		"message": "Comment added successfully",
@@ -243,14 +327,22 @@ func (api *API) AddPersonalTrainerComment(w http.ResponseWriter, r *http.Request
 }
 
 func (api *API) GetPersonalTrainerComments(w http.ResponseWriter, r *http.Request) {
-	trainerID := chi.URLParam(r, "id")
+	trainerIDStr := chi.URLParam(r, "id")
+	trainerID, err := uuid.Parse(trainerIDStr)
+	if err != nil {
+		utils.WriteErrorResponse(w, http.StatusBadRequest, "Invalid trainer ID")
+		return
+	}
 
-	// For now, return empty array
-	// TODO: Implement actual comment retrieval
-	api.Logger.Info("Trainer comments requested", "trainer_id", trainerID)
+	comments, err := api.UserService.GetTrainerComments(r.Context(), trainerID)
+	if err != nil {
+		api.Logger.Error("Failed to get trainer comments", "error", err, "trainer_id", trainerID)
+		utils.WriteErrorResponse(w, http.StatusInternalServerError, "Failed to get comments")
+		return
+	}
 
 	utils.WriteJSONResponse(w, http.StatusOK, map[string]interface{}{
-		"comments": []interface{}{},
+		"comments": comments,
 	})
 }
 
@@ -266,12 +358,12 @@ func (api *API) GetPersonalProfile(w http.ResponseWriter, r *http.Request) {
 	// For now, return mock profile
 	// TODO: Implement actual profile retrieval
 	utils.WriteJSONResponse(w, http.StatusOK, map[string]interface{}{
-		"id":           trainerID.String(),
-		"name":         "John Doe",
-		"email":        "john@example.com",
-		"bio":          "Certified personal trainer",
-		"specialties":  []string{"Weight Loss", "Muscle Building"},
-		"experience":   5,
+		"id":          trainerID.String(),
+		"name":        "John Doe",
+		"email":       "john@example.com",
+		"bio":         "Certified personal trainer",
+		"specialties": []string{"Weight Loss", "Muscle Building"},
+		"experience":  5,
 	})
 }
 
@@ -313,12 +405,15 @@ func (api *API) GetPersonalStudents(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	// For now, return empty array
-	// TODO: Implement actual student retrieval
-	api.Logger.Info("Trainer students requested", "trainer_id", trainerID)
+	students, err := api.UserService.GetTrainerStudents(r.Context(), trainerID)
+	if err != nil {
+		api.Logger.Error("Failed to get trainer students", "error", err, "trainer_id", trainerID)
+		utils.WriteErrorResponse(w, http.StatusInternalServerError, "Failed to get students")
+		return
+	}
 
 	utils.WriteJSONResponse(w, http.StatusOK, map[string]interface{}{
-		"students": []interface{}{},
+		"students": students,
 	})
 }
 
@@ -520,105 +615,4 @@ func (api *API) GetUserStatistics(w http.ResponseWriter, r *http.Request) {
 	}
 
 	utils.WriteJSONResponse(w, http.StatusOK, stats)
-}
-// Plan management (requires trainer role)
-
-func (api *API) GetTrainerPlans(w http.ResponseWriter, r *http.Request) {
-	trainerID, ok := r.Context().Value(utils.UserIDKey).(uuid.UUID)
-	if !ok {
-		utils.WriteErrorResponse(w, http.StatusUnauthorized, "Unauthorized")
-		return
-	}
-
-	plans, err := api.PlanService.GetTrainerPlans(r.Context(), trainerID)
-	if err != nil {
-		api.Logger.Error("Failed to get trainer plans", "error", err, "trainer_id", trainerID)
-		utils.WriteErrorResponse(w, http.StatusInternalServerError, "Failed to get plans")
-		return
-	}
-
-	utils.WriteJSONResponse(w, http.StatusOK, map[string]interface{}{
-		"plans": plans,
-	})
-}
-
-func (api *API) CreatePlan(w http.ResponseWriter, r *http.Request) {
-	trainerID, ok := r.Context().Value(utils.UserIDKey).(uuid.UUID)
-	if !ok {
-		utils.WriteErrorResponse(w, http.StatusUnauthorized, "Unauthorized")
-		return
-	}
-
-	req, err := utils.DecodeValidJSON[struct {
-		Name        string   `json:"name"`
-		Description string   `json:"description"`
-		Price       float64  `json:"price"`
-		Duration    int      `json:"duration"` // in days
-		Features    []string `json:"features"`
-	}](r)
-	if err != nil {
-		utils.WriteErrorResponse(w, http.StatusBadRequest, err.Error())
-		return
-	}
-
-	plan, err := api.PlanService.CreatePlan(r.Context(), trainerID, req.Name, req.Description, req.Price, req.Duration, req.Features)
-	if err != nil {
-		api.Logger.Error("Failed to create plan", "error", err, "trainer_id", trainerID)
-		utils.WriteErrorResponse(w, http.StatusInternalServerError, "Failed to create plan")
-		return
-	}
-
-	utils.WriteJSONResponse(w, http.StatusCreated, plan)
-}
-
-func (api *API) UpdatePlan(w http.ResponseWriter, r *http.Request) {
-	trainerID, ok := r.Context().Value(utils.UserIDKey).(uuid.UUID)
-	if !ok {
-		utils.WriteErrorResponse(w, http.StatusUnauthorized, "Unauthorized")
-		return
-	}
-
-	planID := chi.URLParam(r, "id")
-
-	req, err := utils.DecodeValidJSON[struct {
-		Name        string   `json:"name"`
-		Description string   `json:"description"`
-		Price       float64  `json:"price"`
-		Duration    int      `json:"duration"`
-		Features    []string `json:"features"`
-	}](r)
-	if err != nil {
-		utils.WriteErrorResponse(w, http.StatusBadRequest, err.Error())
-		return
-	}
-
-	plan, err := api.PlanService.UpdatePlan(r.Context(), trainerID, planID, req.Name, req.Description, req.Price, req.Duration, req.Features)
-	if err != nil {
-		api.Logger.Error("Failed to update plan", "error", err, "trainer_id", trainerID, "plan_id", planID)
-		utils.WriteErrorResponse(w, http.StatusInternalServerError, "Failed to update plan")
-		return
-	}
-
-	utils.WriteJSONResponse(w, http.StatusOK, plan)
-}
-
-func (api *API) DeletePlan(w http.ResponseWriter, r *http.Request) {
-	trainerID, ok := r.Context().Value(utils.UserIDKey).(uuid.UUID)
-	if !ok {
-		utils.WriteErrorResponse(w, http.StatusUnauthorized, "Unauthorized")
-		return
-	}
-
-	planID := chi.URLParam(r, "id")
-
-	err := api.PlanService.DeletePlan(r.Context(), trainerID, planID)
-	if err != nil {
-		api.Logger.Error("Failed to delete plan", "error", err, "trainer_id", trainerID, "plan_id", planID)
-		utils.WriteErrorResponse(w, http.StatusInternalServerError, "Failed to delete plan")
-		return
-	}
-
-	utils.WriteJSONResponse(w, http.StatusOK, map[string]string{
-		"message": "Plan deleted successfully",
-	})
 }
