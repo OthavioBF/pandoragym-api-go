@@ -94,26 +94,51 @@ This project follows Clean Architecture principles with clear separation of conc
 
 ## 🔧 Available Commands
 
-Run `make help` to see all available commands:
+Run `make help` to see all available commands with detailed descriptions:
+
+### 🏗️ Build & Run
+- `make build` - Build the application binary
+- `make run` - Run the application locally
+- `make test` - Run all tests
+- `make clean` - Clean build artifacts
 
 ### 🐳 Docker Commands (Full Environment)
-- `make docker-setup` - Complete Docker setup (recommended)
+- `make docker-setup` - Complete Docker setup (recommended for first time)
 - `make docker-run` - Start containers
 - `make docker-stop` - Stop containers
+- `make docker-restart` - Restart containers
 - `make docker-migrate` - Run migrations in Docker
 - `make docker-seed` - Run seed in Docker
+- `make docker-logs` - Show application logs
 - `make docker-status` - Show container status
+- `make docker-shell` - Connect to app container shell
+- `make docker-clean` - Clean up Docker resources
 
-### 💻 Development Commands
-- `make dev-start` - Start dev environment (DB in Docker, app local)
-- `make run` - Run application locally
-- `make build` - Build application binary
-- `make test` - Run tests
-
-### 🗄️ Database & Migrations
-- `make migrate-up` - Run migrations
-- `make seed` - Run database seed
+### 🗄️ Database (Local Development)
+- `make db-start` - Start PostgreSQL container only
+- `make db-stop` - Stop PostgreSQL container
 - `make db-shell` - Connect to database shell
+
+### 🔄 Migrations & Seeding (Local)
+- `make migrate-up` - Run migrations locally
+- `make migrate-down` - Rollback migrations
+- `make migrate-create name=<migration_name>` - Create new migration
+- `make seed` - Run database seed locally
+- `make setup` - Run migrations + seed (complete local setup)
+
+### 🧪 Development Workflows
+- `make dev-start` - Start dev environment (DB in Docker, app local)
+- `make dev-stop` - Stop dev environment
+
+### 🛠️ Tools & Quality
+- `make deps` - Install dependencies
+- `make fmt` - Format code
+- `make lint` - Lint code (requires golangci-lint)
+- `make install-tools` - Install development tools (air, tern, golangci-lint)
+
+### 📊 Quick Start Commands
+- **Full Docker Environment**: `make docker-setup`
+- **Local Development**: `make dev-start && make run`
 
 ## 🔧 Configuration
 

@@ -28,6 +28,9 @@ func InjectDependencies(queries *pgstore.Queries) api.API {
 	workoutService := services.NewWorkoutService(queries)
 	schedulingService := services.NewSchedulingService(queries)
 	authService := services.NewAuthService(queries, jwtSecret)
+	analyticsService := services.NewAnalyticsService(queries)
+	planService := services.NewPlanService(queries)
+	systemService := services.NewSystemService()
 
 	logger.Info("All dependencies initialized successfully")
 
@@ -38,5 +41,8 @@ func InjectDependencies(queries *pgstore.Queries) api.API {
 		WorkoutService:    workoutService,
 		SchedulingService: schedulingService,
 		AuthService:       authService,
+		AnalyticsService:  analyticsService,
+		PlanService:       planService,
+		SystemService:     systemService,
 	}
 }

@@ -13,7 +13,7 @@ type CreateUserParams struct {
 	Email     string    `json:"email" db:"email" validate:"required,email"`
 	Phone     string    `json:"phone" db:"phone" validate:"required"`
 	Password  string    `json:"password" db:"password" validate:"required,min=6"`
-	Role      Role      `json:"role" db:"role" validate:"required,oneof=PERSONAL STUDENT"`
+	Role      Role      `json:"role" db:"role" validate:"required,oneof=PERSONAL STUDENT ADMIN"`
 	CreatedAt time.Time `json:"createdAt" db:"created_at"`
 	UpdatedAt time.Time `json:"updatedAt" db:"updated_at"`
 }
@@ -38,34 +38,6 @@ type CreatePersonalParams struct {
 	Experience     *string   `json:"experience,omitempty" db:"experience"`
 	Specialization *string   `json:"specialization,omitempty" db:"specialization"`
 	Qualifications *string   `json:"qualifications,omitempty" db:"qualifications"`
-}
-
-type CreateStudentWithUserRequest struct {
-	Name                  string    `json:"name" validate:"required,min=2,max=100"`
-	Email                 string    `json:"email" validate:"required,email"`
-	Phone                 string    `json:"phone" validate:"required"`
-	Password              string    `json:"password" validate:"required,min=6"`
-	BornDate              time.Time `json:"bornDate" validate:"required"`
-	Age                   int32     `json:"age" validate:"required,min=13,max=120"`
-	Weight                float64   `json:"weight" validate:"required,min=30,max=300"`
-	Objective             string    `json:"objective" validate:"required"`
-	TrainingFrequency     string    `json:"trainingFrequency" validate:"required"`
-	DidBodybuilding       bool      `json:"didBodybuilding"`
-	MedicalCondition      *string   `json:"medicalCondition,omitempty"`
-	PhysicalActivityLevel *string   `json:"physicalActivityLevel,omitempty"`
-	Observations          *string   `json:"observations,omitempty"`
-}
-
-type CreatePersonalWithUserRequest struct {
-	Name              string  `json:"name" validate:"required,min=2,max=100"`
-	Email             string  `json:"email" validate:"required,email"`
-	Phone             string  `json:"phone" validate:"required"`
-	Password          string  `json:"password" validate:"required,min=6"`
-	Description       *string `json:"description,omitempty"`
-	PresentationVideo *string `json:"presentationVideo,omitempty"`
-	Experience        *string `json:"experience,omitempty"`
-	Specialization    *string `json:"specialization,omitempty"`
-	Qualifications    *string `json:"qualifications,omitempty"`
 }
 
 type UpdateUserParams struct {
@@ -162,11 +134,6 @@ type UpdateUserProfileParams struct {
 	Name      *string   `json:"name,omitempty" db:"name" validate:"omitempty,min=2,max=100"`
 	Phone     *string   `json:"phone,omitempty" db:"phone" validate:"omitempty,min=10"`
 	UpdatedAt time.Time `json:"updatedAt" db:"updated_at"`
-}
-
-type UpdateProfileRequest struct {
-	Name  *string `json:"name,omitempty" validate:"omitempty,min=2,max=100"`
-	Phone *string `json:"phone,omitempty" validate:"omitempty,min=10"`
 }
 
 type UserResponse struct {
@@ -380,4 +347,28 @@ func (q *Queries) DeleteUser(ctx context.Context, id uuid.UUID) error {
 func (q *Queries) GetUserRole(ctx context.Context, id uuid.UUID) (Role, error) {
 	// This would need a SQL query - placeholder for now
 	return RoleStudent, nil
+}
+
+// Count queries for analytics
+
+const countUsers = `-- name: CountUsers :one
+SELECT COUNT(*) FROM users
+`
+
+func (q *Queries) CountUsers(ctx context.Context) (int64, error) {
+	row := q.db.QueryRow(ctx, countUsers)
+	var count int64
+	err := row.Scan(&count)
+	return count, err
+}
+
+const countUsersByRole = `-- name: CountUsersByRole :one
+SELECT COUNT(*) FROM users WHERE role = $1
+`
+
+func (q *Queries) CountUsersByRole(ctx context.Context, role Role) (int64, error) {
+	row := q.db.QueryRow(ctx, countUsersByRole, role)
+	var count int64
+	err := row.Scan(&count)
+	return count, err
 }

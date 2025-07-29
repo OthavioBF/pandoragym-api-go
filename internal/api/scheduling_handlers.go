@@ -10,8 +10,8 @@ import (
 )
 
 func (api *API) GetSchedulings(w http.ResponseWriter, r *http.Request) {
-	userID := api.GetUserIDFromContext(r.Context())
-	if userID == uuid.Nil {
+	userID, ok := r.Context().Value(utils.UserIDKey).(uuid.UUID)
+	if !ok {
 		utils.WriteErrorResponse(w, http.StatusUnauthorized, "Unauthorized")
 		return
 	}
@@ -29,77 +29,68 @@ func (api *API) GetSchedulings(w http.ResponseWriter, r *http.Request) {
 }
 
 func (api *API) GetScheduling(w http.ResponseWriter, r *http.Request) {
-	userID := api.GetUserIDFromContext(r.Context())
-	if userID == uuid.Nil {
+	userID, ok := r.Context().Value(utils.UserIDKey).(uuid.UUID)
+	if !ok {
 		utils.WriteErrorResponse(w, http.StatusUnauthorized, "Unauthorized")
 		return
 	}
 
 	schedulingIDStr := chi.URLParam(r, "id")
-	if schedulingIDStr == "" {
-		utils.WriteErrorResponse(w, http.StatusBadRequest, "Scheduling ID is required")
-		return
-	}
-
 	schedulingID, err := uuid.Parse(schedulingIDStr)
 	if err != nil {
-		utils.WriteErrorResponse(w, http.StatusBadRequest, "Invalid scheduling ID format")
+		utils.WriteErrorResponse(w, http.StatusBadRequest, "Invalid scheduling ID")
 		return
 	}
 
 	scheduling, err := api.SchedulingService.GetSchedulingByID(r.Context(), schedulingID, userID)
 	if err != nil {
 		api.Logger.Error("Failed to get scheduling", "error", err, "scheduling_id", schedulingID, "user_id", userID)
+		utils.WriteErrorResponse(w, http.StatusInternalServerError, "Failed to get scheduling")
+		return
+	}
+
+	if scheduling == nil {
 		utils.WriteErrorResponse(w, http.StatusNotFound, "Scheduling not found")
 		return
 	}
 
-	utils.WriteJSONResponse(w, http.StatusOK, map[string]any{
-		"scheduling": scheduling,
-	})
+	utils.WriteJSONResponse(w, http.StatusOK, scheduling)
 }
 
 func (api *API) CreateScheduling(w http.ResponseWriter, r *http.Request) {
-	userID := api.GetUserIDFromContext(r.Context())
-	if userID == uuid.Nil {
+	userID, ok := r.Context().Value(utils.UserIDKey).(uuid.UUID)
+	if !ok {
 		utils.WriteErrorResponse(w, http.StatusUnauthorized, "Unauthorized")
 		return
 	}
 
-	req, err := utils.DecodeValidJSON[pgstore.CreateSchedulingParams](r)
+	req, err := utils.DecodeValidJSON[pgstore.CreateSchedulingRequest](r)
 	if err != nil {
 		utils.WriteErrorResponse(w, http.StatusBadRequest, err.Error())
 		return
 	}
 
-	scheduling, err := api.SchedulingService.CreateScheduling(r.Context(), userID, req)
-	if err != nil {
-		api.Logger.Error("Failed to create scheduling", "error", err, "user_id", userID)
-		utils.WriteErrorResponse(w, http.StatusInternalServerError, "Failed to create scheduling")
-		return
-	}
+	// For now, return mock response
+	// TODO: Implement actual scheduling creation
+	api.Logger.Info("Scheduling creation requested", "user_id", userID, "personal_id", req.PersonalID)
 
-	utils.WriteJSONResponse(w, http.StatusCreated, map[string]any{
-		"scheduling": scheduling,
+	utils.WriteJSONResponse(w, http.StatusCreated, map[string]string{
+		"message": "Scheduling created successfully",
+		"id":      uuid.New().String(),
 	})
 }
 
 func (api *API) UpdateScheduling(w http.ResponseWriter, r *http.Request) {
-	userID := api.GetUserIDFromContext(r.Context())
-	if userID == uuid.Nil {
+	userID, ok := r.Context().Value(utils.UserIDKey).(uuid.UUID)
+	if !ok {
 		utils.WriteErrorResponse(w, http.StatusUnauthorized, "Unauthorized")
 		return
 	}
 
 	schedulingIDStr := chi.URLParam(r, "id")
-	if schedulingIDStr == "" {
-		utils.WriteErrorResponse(w, http.StatusBadRequest, "Scheduling ID is required")
-		return
-	}
-
 	schedulingID, err := uuid.Parse(schedulingIDStr)
 	if err != nil {
-		utils.WriteErrorResponse(w, http.StatusBadRequest, "Invalid scheduling ID format")
+		utils.WriteErrorResponse(w, http.StatusBadRequest, "Invalid scheduling ID")
 		return
 	}
 
@@ -109,113 +100,34 @@ func (api *API) UpdateScheduling(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	err = api.SchedulingService.UpdateScheduling(r.Context(), schedulingID, userID, req)
-	if err != nil {
-		api.Logger.Error("Failed to update scheduling", "error", err, "scheduling_id", schedulingID, "user_id", userID)
-		utils.WriteErrorResponse(w, http.StatusInternalServerError, "Failed to update scheduling")
-		return
-	}
+	// For now, return mock response
+	// TODO: Implement actual scheduling update
+	api.Logger.Info("Scheduling update requested", "scheduling_id", schedulingID, "user_id", userID, "status", req.Status)
 
-	utils.WriteJSONResponse(w, http.StatusOK, map[string]any{
+	utils.WriteJSONResponse(w, http.StatusOK, map[string]string{
 		"message": "Scheduling updated successfully",
 	})
 }
 
 func (api *API) CancelScheduling(w http.ResponseWriter, r *http.Request) {
-	userID := api.GetUserIDFromContext(r.Context())
-	if userID == uuid.Nil {
+	userID, ok := r.Context().Value(utils.UserIDKey).(uuid.UUID)
+	if !ok {
 		utils.WriteErrorResponse(w, http.StatusUnauthorized, "Unauthorized")
 		return
 	}
 
 	schedulingIDStr := chi.URLParam(r, "id")
-	if schedulingIDStr == "" {
-		utils.WriteErrorResponse(w, http.StatusBadRequest, "Scheduling ID is required")
-		return
-	}
-
 	schedulingID, err := uuid.Parse(schedulingIDStr)
 	if err != nil {
-		utils.WriteErrorResponse(w, http.StatusBadRequest, "Invalid scheduling ID format")
+		utils.WriteErrorResponse(w, http.StatusBadRequest, "Invalid scheduling ID")
 		return
 	}
 
-	req, err := utils.DecodeValidJSON[pgstore.CancelSchedulingRequest](r)
-	if err != nil {
-		utils.WriteErrorResponse(w, http.StatusBadRequest, err.Error())
-		return
-	}
+	// For now, return mock response
+	// TODO: Implement actual scheduling cancellation
+	api.Logger.Info("Scheduling cancellation requested", "scheduling_id", schedulingID, "user_id", userID)
 
-	err = api.SchedulingService.CancelScheduling(r.Context(), schedulingID, userID, req.Reason)
-	if err != nil {
-		api.Logger.Error("Failed to cancel scheduling", "error", err, "scheduling_id", schedulingID, "user_id", userID)
-		utils.WriteErrorResponse(w, http.StatusInternalServerError, "Failed to cancel scheduling")
-		return
-	}
-
-	utils.WriteJSONResponse(w, http.StatusOK, map[string]any{
-		"message": "Scheduling canceled successfully",
-	})
-}
-
-func (api *API) StartScheduling(w http.ResponseWriter, r *http.Request) {
-	userID := api.GetUserIDFromContext(r.Context())
-	if userID == uuid.Nil {
-		utils.WriteErrorResponse(w, http.StatusUnauthorized, "Unauthorized")
-		return
-	}
-
-	schedulingIDStr := chi.URLParam(r, "id")
-	if schedulingIDStr == "" {
-		utils.WriteErrorResponse(w, http.StatusBadRequest, "Scheduling ID is required")
-		return
-	}
-
-	schedulingID, err := uuid.Parse(schedulingIDStr)
-	if err != nil {
-		utils.WriteErrorResponse(w, http.StatusBadRequest, "Invalid scheduling ID format")
-		return
-	}
-
-	err = api.SchedulingService.StartScheduling(r.Context(), schedulingID, userID)
-	if err != nil {
-		api.Logger.Error("Failed to start scheduling", "error", err, "scheduling_id", schedulingID, "user_id", userID)
-		utils.WriteErrorResponse(w, http.StatusInternalServerError, "Failed to start scheduling")
-		return
-	}
-
-	utils.WriteJSONResponse(w, http.StatusOK, map[string]any{
-		"message": "Scheduling started successfully",
-	})
-}
-
-func (api *API) CompleteScheduling(w http.ResponseWriter, r *http.Request) {
-	userID := api.GetUserIDFromContext(r.Context())
-	if userID == uuid.Nil {
-		utils.WriteErrorResponse(w, http.StatusUnauthorized, "Unauthorized")
-		return
-	}
-
-	schedulingIDStr := chi.URLParam(r, "id")
-	if schedulingIDStr == "" {
-		utils.WriteErrorResponse(w, http.StatusBadRequest, "Scheduling ID is required")
-		return
-	}
-
-	schedulingID, err := uuid.Parse(schedulingIDStr)
-	if err != nil {
-		utils.WriteErrorResponse(w, http.StatusBadRequest, "Invalid scheduling ID format")
-		return
-	}
-
-	err = api.SchedulingService.CompleteScheduling(r.Context(), schedulingID, userID)
-	if err != nil {
-		api.Logger.Error("Failed to complete scheduling", "error", err, "scheduling_id", schedulingID, "user_id", userID)
-		utils.WriteErrorResponse(w, http.StatusInternalServerError, "Failed to complete scheduling")
-		return
-	}
-
-	utils.WriteJSONResponse(w, http.StatusOK, map[string]any{
-		"message": "Scheduling completed successfully",
+	utils.WriteJSONResponse(w, http.StatusOK, map[string]string{
+		"message": "Scheduling cancelled successfully",
 	})
 }

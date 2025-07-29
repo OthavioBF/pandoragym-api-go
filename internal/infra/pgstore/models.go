@@ -12,6 +12,7 @@ type Role string
 const (
 	RolePersonal Role = "PERSONAL"
 	RoleStudent  Role = "STUDENT"
+	RoleAdmin    Role = "ADMIN"
 )
 
 type SchedulingStatus string
@@ -267,4 +268,93 @@ type MessageResponse struct {
 	Title      string    `json:"title"`
 	Content    string    `json:"content"`
 	SentAt     time.Time `json:"sentAt"`
+}
+// Request/Response types
+type AuthenticateWithPasswordRequest struct {
+	Email    string `json:"email" validate:"required,email"`
+	Password string `json:"password" validate:"required"`
+}
+
+type CreateStudentWithUserRequest struct {
+	Name                  string    `json:"name" validate:"required,min=2,max=100"`
+	Email                 string    `json:"email" validate:"required,email"`
+	Phone                 string    `json:"phone" validate:"required"`
+	Password              string    `json:"password" validate:"required,min=6"`
+	BornDate              time.Time `json:"bornDate" validate:"required"`
+	Age                   int32     `json:"age" validate:"required,min=13,max=120"`
+	Weight                float64   `json:"weight" validate:"required,min=30,max=300"`
+	Objective             string    `json:"objective" validate:"required"`
+	TrainingFrequency     string    `json:"trainingFrequency" validate:"required"`
+	DidBodybuilding       bool      `json:"didBodybuilding"`
+	MedicalCondition      *string   `json:"medicalCondition,omitempty"`
+	PhysicalActivityLevel *string   `json:"physicalActivityLevel,omitempty"`
+	Observations          *string   `json:"observations,omitempty"`
+}
+
+type CreatePersonalWithUserRequest struct {
+	Name           string  `json:"name" validate:"required,min=2,max=100"`
+	Email          string  `json:"email" validate:"required,email"`
+	Phone          string  `json:"phone" validate:"required"`
+	Password       string  `json:"password" validate:"required,min=6"`
+	Description    *string `json:"description,omitempty"`
+	VideoURL       *string `json:"videoUrl,omitempty"`
+	Experience     *string `json:"experience,omitempty"`
+	Specialization *string `json:"specialization,omitempty"`
+	Qualifications *string `json:"qualifications,omitempty"`
+}
+
+type UpdateProfileRequest struct {
+	Name  *string `json:"name,omitempty" validate:"omitempty,min=2,max=100"`
+	Email *string `json:"email,omitempty" validate:"omitempty,email"`
+	Phone *string `json:"phone,omitempty"`
+}
+
+type CreateWorkoutRequest struct {
+	Name        string   `json:"name" validate:"required,min=2,max=100"`
+	Description string   `json:"description" validate:"required"`
+	Thumbnail   string   `json:"thumbnail"`
+	WeekDays    *[]Day   `json:"weekDays,omitempty"`
+	Exclusive   *bool    `json:"exclusive,omitempty"`
+}
+
+type UpdateWorkoutRequest struct {
+	Name        *string `json:"name,omitempty" validate:"omitempty,min=2,max=100"`
+	Description *string `json:"description,omitempty"`
+	Thumbnail   *string `json:"thumbnail,omitempty"`
+	WeekDays    *[]Day  `json:"weekDays,omitempty"`
+	Exclusive   *bool   `json:"exclusive,omitempty"`
+}
+
+type CreateExerciseRequest struct {
+	Name         string `json:"name" validate:"required,min=2,max=100"`
+	Description  string `json:"description" validate:"required"`
+	VideoURL     string `json:"videoUrl" validate:"required,url"`
+	Instructions string `json:"instructions" validate:"required"`
+	Category     string `json:"category" validate:"required"`
+}
+
+type UpdateExerciseRequest struct {
+	Name         *string `json:"name,omitempty" validate:"omitempty,min=2,max=100"`
+	Description  *string `json:"description,omitempty"`
+	VideoURL     *string `json:"videoUrl,omitempty" validate:"omitempty,url"`
+	Instructions *string `json:"instructions,omitempty"`
+	Category     *string `json:"category,omitempty"`
+}
+
+type CreateSchedulingRequest struct {
+	Date      time.Time      `json:"date" validate:"required"`
+	StartTime time.Time      `json:"startTime" validate:"required"`
+	EndTime   time.Time      `json:"endTime" validate:"required"`
+	Type      SchedulingType `json:"type" validate:"required"`
+	Notes     *string        `json:"notes,omitempty"`
+	PersonalID uuid.UUID     `json:"personalId" validate:"required"`
+}
+
+type UpdateSchedulingRequest struct {
+	Date      *time.Time      `json:"date,omitempty"`
+	StartTime *time.Time      `json:"startTime,omitempty"`
+	EndTime   *time.Time      `json:"endTime,omitempty"`
+	Status    *SchedulingStatus `json:"status,omitempty"`
+	Type      *SchedulingType `json:"type,omitempty"`
+	Notes     *string         `json:"notes,omitempty"`
 }

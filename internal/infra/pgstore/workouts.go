@@ -292,3 +292,16 @@ func (q *Queries) DeleteWorkout(ctx context.Context, arg DeleteWorkoutParams) er
 	_, err := q.db.Exec(ctx, deleteWorkout, arg.ID)
 	return err
 }
+
+// Count queries for analytics
+
+const countWorkouts = `-- name: CountWorkouts :one
+SELECT COUNT(*) FROM workout WHERE deleted_at IS NULL
+`
+
+func (q *Queries) CountWorkouts(ctx context.Context) (int64, error) {
+	row := q.db.QueryRow(ctx, countWorkouts)
+	var count int64
+	err := row.Scan(&count)
+	return count, err
+}

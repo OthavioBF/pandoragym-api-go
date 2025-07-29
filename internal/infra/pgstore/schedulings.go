@@ -59,13 +59,6 @@ type CreateSchedulingHistoryParams struct {
 	Notes      *string          `json:"notes,omitempty" db:"notes"`
 }
 
-type UpdateSchedulingRequest struct {
-	Date      *time.Time       `json:"date,omitempty" validate:"omitempty"`
-	Type      *SchedulingType  `json:"type,omitempty" validate:"omitempty,oneof=ONLINE IN_PERSON"`
-	Status    *SchedulingStatus `json:"status,omitempty" validate:"omitempty"`
-	WorkoutID *uuid.UUID       `json:"workoutId,omitempty"`
-}
-
 type CancelSchedulingRequest struct {
 	Reason string `json:"reason" validate:"required,min=5,max=500"`
 }

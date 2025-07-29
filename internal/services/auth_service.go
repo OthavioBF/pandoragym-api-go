@@ -177,7 +177,7 @@ func (s *AuthService) CreatePersonal(ctx context.Context, req *pgstore.CreatePer
 	err = s.queries.CreatePersonal(ctx, pgstore.CreatePersonalParams{
 		ID:             userID,
 		Description:    req.Description,
-		VideoURL:       req.PresentationVideo,
+		VideoURL:       req.VideoURL,
 		Experience:     req.Experience,
 		Specialization: req.Specialization,
 		Qualifications: req.Qualifications,

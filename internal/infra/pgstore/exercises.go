@@ -345,3 +345,16 @@ func (q *Queries) GetExercisesByWorkoutId(ctx context.Context, workoutID uuid.UU
 	}
 	return items, nil
 }
+
+// Count queries for analytics
+
+const countExercises = `-- name: CountExercises :one
+SELECT COUNT(*) FROM exercise WHERE deleted_at IS NULL
+`
+
+func (q *Queries) CountExercises(ctx context.Context) (int64, error) {
+	row := q.db.QueryRow(ctx, countExercises)
+	var count int64
+	err := row.Scan(&count)
+	return count, err
+}

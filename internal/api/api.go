@@ -14,4 +14,7 @@ type API struct {
 	WorkoutService    *services.WorkoutService
 	SchedulingService *services.SchedulingService
 	AuthService       *services.AuthService
+	AnalyticsService  *services.AnalyticsService
+	PlanService       *services.PlanService
+	SystemService     services.SystemService
 }
