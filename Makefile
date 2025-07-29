@@ -1,318 +1,263 @@
-.PHONY: build run test clean docker-build docker-run docker-stop migrate-up migrate-down seed setup deploy-db deploy-app local-start local-stop local-restart local-status local-setup
+.PHONY: help build run test clean deps fmt lint docker-setup docker-run docker-stop docker-restart docker-migrate docker-seed docker-logs docker-status docker-shell docker-clean db-start db-stop db-shell migrate-up migrate-down migrate-create seed setup dev-start dev-stop install-tools
+
+# Default target
+.DEFAULT_GOAL := help
 
 # Build the application
 build:
+	@echo "🔨 Building application..."
 	go build -o bin/pandoragym-api cmd/server/main.go
+	@echo "✅ Build completed!"
 
-# Run the application
+# Run the application locally
 run:
+	@echo "🚀 Starting application locally..."
 	go run cmd/server/main.go
 
 # Run tests
 test:
+	@echo "🧪 Running tests..."
 	go test -v ./...
 
 # Clean build artifacts
 clean:
+	@echo "🧹 Cleaning build artifacts..."
 	rm -rf bin/
+	@echo "✅ Clean completed!"
 
 # Install dependencies
 deps:
+	@echo "📦 Installing dependencies..."
 	go mod download
 	go mod tidy
+	@echo "✅ Dependencies installed!"
 
 # Format code
 fmt:
+	@echo "🎨 Formatting code..."
 	go fmt ./...
+	@echo "✅ Code formatted!"
 
 # Lint code
 lint:
+	@echo "🔍 Linting code..."
 	golangci-lint run
+	@echo "✅ Linting completed!"
 
-# Docker commands - Full deployment (database + app)
-docker-build:
-	docker build -t pandoragym-api .
+# =============================================================================
+# Docker Commands
+# =============================================================================
 
+# Complete Docker setup (recommended for first time)
+docker-setup:
+	@echo "🚀 Setting up complete Docker environment..."
+	@make docker-run
+	@echo "⏳ Waiting for database to be ready..."
+	@sleep 15
+	@make docker-migrate
+	@make docker-seed
+	@echo "🎉 Complete Docker environment ready!"
+	@echo "🌐 App available at http://localhost:3333"
+
+# Start Docker containers
 docker-run:
+	@echo "🚀 Starting Docker containers..."
 	docker-compose up -d
+	@echo "⏳ Waiting for services to be ready..."
+	@sleep 10
+	@echo "✅ Containers started!"
+	@echo "💡 Run 'make docker-migrate' and 'make docker-seed' if needed"
 
+# Stop Docker containers
 docker-stop:
+	@echo "🛑 Stopping Docker containers..."
 	docker-compose down
+	@echo "✅ Containers stopped!"
 
+# Restart Docker containers
+docker-restart:
+	@echo "🔄 Restarting Docker containers..."
+	@make docker-stop
+	@make docker-run
+
+# Run migrations in Docker
+docker-migrate:
+	@echo "📊 Running migrations in Docker..."
+	docker-compose exec -e DATABASE_HOST=db -e DATABASE_PORT=5432 -e DATABASE_NAME=pandoragym_db -e DATABASE_USER=pandoragym -e DATABASE_PASSWORD=password app go run ./cmd/tern
+	@echo "✅ Migrations completed!"
+
+# Run seed in Docker
+docker-seed:
+	@echo "🌱 Running seed in Docker..."
+	docker-compose exec app go run ./cmd/seed
+	@echo "✅ Seed completed!"
+
+# Show Docker logs
 docker-logs:
+	@echo "📋 Showing application logs..."
 	docker-compose logs -f app
 
-# Separate deployment commands
-deploy-db:
-	./deploy-db.sh
+# Show Docker container status
+docker-status:
+	@echo "📊 Docker Services Status:"
+	@echo "=========================="
+	@docker-compose ps
 
-deploy-app:
-	./deploy-app.sh
+# Connect to app container shell
+docker-shell:
+	@echo "🐚 Connecting to application container..."
+	docker-compose exec app sh
 
-# Database-only Docker commands
+# Clean up Docker resources
+docker-clean:
+	@echo "🧹 Cleaning up Docker resources..."
+	docker-compose down -v
+	docker system prune -f
+	@echo "✅ Cleanup completed!"
+
+# =============================================================================
+# Database Commands (for local development)
+# =============================================================================
+
+# Start database container only
 db-start:
-	@echo "📊 Starting PostgreSQL Docker container..."
-	@docker-compose -f docker-compose.db.yml up -d
+	@echo "📊 Starting PostgreSQL container..."
+	docker run -d \
+		--name pandoragym_db \
+		-e POSTGRES_DB=pandoragym_db \
+		-e POSTGRES_USER=pandoragym \
+		-e POSTGRES_PASSWORD=password \
+		-p 5432:5432 \
+		postgres:15-alpine || echo "Container already exists"
 	@echo "⏳ Waiting for database to be ready..."
-	@for i in 1 2 3 4 5 6 7 8 9 10; do \
-		if docker-compose -f docker-compose.db.yml exec -T db pg_isready -U pandoragym -d pandoragym_db > /dev/null 2>&1; then \
-			echo "✅ Database is ready!"; \
-			exit 0; \
-		fi; \
-		echo "Waiting... ($$i/10)"; \
-		sleep 3; \
-	done; \
-	echo "❌ Database failed to start!" && exit 1
+	@sleep 5
+	@echo "✅ Database ready!"
 
+# Stop database container
 db-stop:
-	@echo "🛑 Stopping PostgreSQL Docker container..."
-	@docker-compose -f docker-compose.db.yml stop
+	@echo "🛑 Stopping PostgreSQL container..."
+	docker stop pandoragym_db || true
+	docker rm pandoragym_db || true
 	@echo "✅ Database stopped!"
 
-db-restart:
-	@echo "🔄 Restarting PostgreSQL Docker container..."
-	@make db-stop
-	@make db-start
-
-db-logs:
-	@echo "📋 Showing PostgreSQL logs..."
-	@docker-compose -f docker-compose.db.yml logs -f db
-
+# Connect to database shell
 db-shell:
 	@echo "🐚 Connecting to PostgreSQL shell..."
-	@docker-compose -f docker-compose.db.yml exec db psql -U pandoragym -d pandoragym_db
+	docker exec -it pandoragym_db psql -U pandoragym -d pandoragym_db
 
-db-status:
-	@echo "📊 Database Status:"
-	@echo "=================="
-	@printf "Container: "
-	@if docker-compose -f docker-compose.db.yml ps | grep pandoragym_db | grep Up > /dev/null; then \
-		echo "✅ Running"; \
-	else \
-		echo "❌ Stopped"; \
-	fi
-	@printf "Health: "
-	@if docker-compose -f docker-compose.db.yml exec -T db pg_isready -U pandoragym -d pandoragym_db > /dev/null 2>&1; then \
-		echo "✅ Healthy"; \
-	else \
-		echo "❌ Unhealthy"; \
-	fi
+# =============================================================================
+# Migration and Seed Commands (for local development)
+# =============================================================================
 
-db-remove:
-	@echo "🗑️  Removing PostgreSQL Docker container and volumes..."
-	@docker-compose -f docker-compose.db.yml down -v
-	@echo "✅ Database removed!"
-
-db-reset: db-remove db-start
-	@echo "🔄 Database reset complete!"
-
-# Local services management (PostgreSQL + Go App)
-local-start:
-	@echo "🚀 Starting local PandoraGym services..."
-	@echo "📊 Starting PostgreSQL with Docker..."
-	@docker-compose -f docker-compose.db.yml up -d
-	@echo "⏳ Waiting for database to be ready..."
-	@for i in 1 2 3 4 5 6 7 8 9 10; do \
-		if docker-compose -f docker-compose.db.yml exec -T db pg_isready -U pandoragym -d pandoragym_db > /dev/null 2>&1; then \
-			echo "✅ Database is ready!"; \
-			break; \
-		fi; \
-		echo "Waiting... ($$i/10)"; \
-		sleep 3; \
-		if [ $$i -eq 10 ]; then \
-			echo "❌ Database failed to start!" && exit 1; \
-		fi; \
-	done
-	@echo "🚀 Starting Go application with hot reload..."
-	@nohup air > app.log 2>&1 & echo $$! > app.pid
-	@sleep 5
-	@echo "🔍 Testing application..."
-	@if curl -s http://localhost:3333/health > /dev/null; then \
-		echo "✅ Application is running successfully!"; \
-		echo "🌐 API available at: http://localhost:3333"; \
-		echo "🗄️  Database available at: localhost:5432"; \
-		echo ""; \
-		echo "💡 Tip: If you need database setup, run 'make local-setup'"; \
-	else \
-		echo "❌ Application failed to start!"; \
-		echo "💡 Try running 'make local-setup' for complete setup"; \
-		exit 1; \
-	fi
-
-local-stop:
-	@echo "🛑 Stopping local PandoraGym services..."
-	@echo "📊 Stopping Go application..."
-	@if [ -f app.pid ]; then \
-		kill `cat app.pid` 2>/dev/null || true; \
-		rm -f app.pid; \
-	fi
-	@pkill -f "go run cmd/server/main.go" 2>/dev/null || true
-	@pkill -f "pandoragym-api" 2>/dev/null || true
-	@lsof -ti:3333 | xargs kill -9 2>/dev/null || true
-	@echo "🗄️  Stopping PostgreSQL Docker container..."
-	@docker-compose -f docker-compose.db.yml down
-	@echo "✅ All services stopped!"
-
-local-restart: local-stop local-start
-
-local-status:
-	@echo "📊 Local Services Status:"
-	@echo "========================="
-	@printf "PostgreSQL: "
-	@if docker-compose -f docker-compose.db.yml ps | grep pandoragym_db | grep Up > /dev/null; then \
-		echo "✅ Running (Docker)"; \
-	else \
-		echo "❌ Stopped"; \
-	fi
-	@printf "Go Application: "
-	@if curl -s http://localhost:3333/health > /dev/null 2>&1; then \
-		echo "✅ Running (http://localhost:3333)"; \
-	else \
-		echo "❌ Stopped"; \
-	fi
-	@printf "Database Connection: "
-	@if docker-compose -f docker-compose.db.yml exec -T db pg_isready -U pandoragym -d pandoragym_db > /dev/null 2>&1; then \
-		echo "✅ Connected (port 5432)"; \
-	else \
-		echo "❌ Failed"; \
-	fi
-
-local-setup:
-	@echo "🎯 PandoraGym API - Complete Local Setup"
-	@echo "========================================"
-	@echo ""
-	@echo "📊 Starting PostgreSQL with Docker..."
-	@docker-compose -f docker-compose.db.yml up -d
-	@echo "⏳ Waiting for database to be ready..."
-	@for i in 1 2 3 4 5 6 7 8 9 10; do \
-		if docker-compose -f docker-compose.db.yml exec -T db pg_isready -U pandoragym -d pandoragym_db > /dev/null 2>&1; then \
-			echo "✅ Database is ready!"; \
-			break; \
-		fi; \
-		echo "Waiting... ($$i/10)"; \
-		sleep 3; \
-		if [ $$i -eq 10 ]; then \
-			echo "❌ Database failed to start!" && exit 1; \
-		fi; \
-	done
-	@echo "🔗 Testing database connection..."
-	@if docker-compose -f docker-compose.db.yml exec -T db psql -U pandoragym -d pandoragym_db -c "SELECT 1;" > /dev/null 2>&1; then \
-		echo "✅ Database connection successful!"; \
-	else \
-		echo "❌ Database connection failed!"; \
-		exit 1; \
-	fi
-	@echo "🚀 Starting Go application with hot reload..."
-	@nohup air > app.log 2>&1 & echo $$! > app.pid
-	@sleep 5
-	@echo "🔍 Testing application..."
-	@if curl -s http://localhost:3333/health > /dev/null; then \
-		echo "✅ Application is running successfully!"; \
-	else \
-		echo "❌ Application failed to start!"; \
-		exit 1; \
-	fi
-	@echo ""
-	@echo "🔄 Running database migrations..."
-	@make migrate-up
-	@echo ""
-	@echo "🌱 Seeding database with sample data..."
-	@make seed
-	@echo ""
-	@echo "🎉 Local setup completed successfully!"
-	@echo ""
-	@echo "📋 Your PandoraGym API is ready:"
-	@echo "  🌐 API: http://localhost:3333"
-	@echo "  🗄️  Database: localhost:5433"
-	@echo "  📊 Status: make local-status"
-	@echo ""
-	@echo "🧪 Test credentials:"
-	@echo "  👨‍💼 Personal Trainer: carlos@pandoragym.com / 123456"
-	@echo "  🎓 Student: joao@email.com / 123456"
-
+# Run migrations locally
 migrate-up:
+	@echo "📊 Running migrations locally..."
 	go run ./cmd/tern
+	@echo "✅ Migrations completed!"
 
+# Rollback migrations
 migrate-down:
+	@echo "⬇️ Rolling back migrations..."
 	tern migrate --migrations ./internal/infra/pgstore/migrations --config ./internal/infra/pgstore/migrations/tern.conf --destination 0
+	@echo "✅ Migrations rolled back!"
 
+# Create new migration
 migrate-create:
 	@if [ -z "$(name)" ]; then echo "Usage: make migrate-create name=migration_name"; exit 1; fi
+	@echo "📝 Creating new migration: $(name)"
 	tern new --migrations ./internal/infra/pgstore/migrations $(name)
+	@echo "✅ Migration created!"
 
-# Seed database with sample data
+# Run seed locally
 seed:
+	@echo "🌱 Running seed locally..."
 	go run ./cmd/seed
+	@echo "✅ Seed completed!"
 
-# Complete setup (migrations + seed)
+# Complete setup (migrations + seed) locally
 setup: migrate-up seed
 
-# Development commands
-dev:
-	air
+# =============================================================================
+# Development Workflows
+# =============================================================================
+
+# Start development environment (DB in Docker, app local)
+dev-start:
+	@echo "🚀 Starting development environment..."
+	@make db-start
+	@echo "📊 Running migrations..."
+	@make migrate-up
+	@echo "🌱 Running seed..."
+	@make seed
+	@echo "✅ Development environment ready!"
+	@echo "💡 Run 'make run' to start the application locally"
+
+# Stop development environment
+dev-stop:
+	@make db-stop
+
+# =============================================================================
+# Tools
+# =============================================================================
 
 # Install development tools
 install-tools:
+	@echo "🛠️ Installing development tools..."
 	go install github.com/cosmtrek/air@latest
 	go install github.com/jackc/tern/v2@latest
+	go install github.com/golangci/golangci-lint/cmd/golangci-lint@latest
+	@echo "✅ Tools installed!"
 
-# Generate API documentation
-docs:
-	swag init -g cmd/server/main.go
-
-# Security scan
-security:
-	gosec ./...
-
-# Benchmark tests
-bench:
-	go test -bench=. -benchmem ./...
-
-# Coverage report
-coverage:
-	go test -coverprofile=coverage.out ./...
-	go tool cover -html=coverage.out -o coverage.html
-
+# =============================================================================
 # Help
+# =============================================================================
+
 help:
-	@echo "Available commands:"
+	@echo "🚀 PandoraGym API - Available Commands"
+	@echo "====================================="
 	@echo ""
-	@echo "🚀 Local Services:"
-	@echo "  local-start      - Start PostgreSQL and Go application"
-	@echo "  local-stop       - Stop PostgreSQL and Go application"
-	@echo "  local-restart    - Restart all local services"
-	@echo "  local-status     - Check status of all local services"
-	@echo "  local-setup      - Complete setup (create DB + start + migrate + seed)"
-	@echo ""
-	@echo "🚀 Deployment:"
-	@echo "  deploy-db        - Deploy database only (Docker)"
-	@echo "  deploy-app       - Deploy Go application (requires database)"
-	@echo "  docker-run       - Full deployment (database + app in Docker)"
-	@echo ""
-	@echo "🗄️  Database:"
-	@echo "  db-start         - Start database container only"
-	@echo "  db-stop          - Stop database container"
-	@echo "  db-logs          - View database logs"
-	@echo "  db-remove        - Remove database container and data"
-	@echo ""
-	@echo "🔄 Migrations & Seeding:"
-	@echo "  migrate-up       - Run database migrations"
-	@echo "  migrate-down     - Rollback all migrations"
-	@echo "  migrate-create name=<name> - Create new migration"
-	@echo "  seed             - Seed database with sample data"
-	@echo "  setup            - Run migrations and seed"
-	@echo ""
-	@echo "🏗️  Development:"
-	@echo "  build            - Build the application"
-	@echo "  run              - Run the application"
-	@echo "  test             - Run tests"
-	@echo "  dev              - Run with hot reload"
+	@echo "🏗️  Build & Run:"
+	@echo "  build            - Build the application binary"
+	@echo "  run              - Run the application locally"
+	@echo "  test             - Run all tests"
 	@echo "  clean            - Clean build artifacts"
+	@echo ""
+	@echo "🐳 Docker Commands (Full Environment):"
+	@echo "  docker-setup     - Complete Docker setup (recommended)"
+	@echo "  docker-run       - Start containers"
+	@echo "  docker-stop      - Stop containers"
+	@echo "  docker-restart   - Restart containers"
+	@echo "  docker-migrate   - Run migrations in Docker"
+	@echo "  docker-seed      - Run seed in Docker"
+	@echo "  docker-logs      - Show app logs"
+	@echo "  docker-status    - Show container status"
+	@echo "  docker-shell     - Connect to app container"
+	@echo "  docker-clean     - Clean up Docker resources"
+	@echo ""
+	@echo "🗄️  Database (Local Development):"
+	@echo "  db-start         - Start PostgreSQL container"
+	@echo "  db-stop          - Stop PostgreSQL container"
+	@echo "  db-shell         - Connect to database shell"
+	@echo ""
+	@echo "🔄 Migrations & Seeding (Local):"
+	@echo "  migrate-up       - Run migrations"
+	@echo "  migrate-down     - Rollback migrations"
+	@echo "  migrate-create name=<name> - Create new migration"
+	@echo "  seed             - Run database seed"
+	@echo "  setup            - Run migrations + seed"
+	@echo ""
+	@echo "🧪 Development Workflows:"
+	@echo "  dev-start        - Start dev environment (DB in Docker, app local)"
+	@echo "  dev-stop         - Stop dev environment"
+	@echo ""
+	@echo "🛠️  Tools & Quality:"
 	@echo "  deps             - Install dependencies"
 	@echo "  fmt              - Format code"
 	@echo "  lint             - Lint code"
+	@echo "  install-tools    - Install development tools"
 	@echo ""
-	@echo "📊 Analysis:"
-	@echo "  coverage         - Generate test coverage report"
-	@echo "  bench            - Run benchmarks"
-	@echo "  security         - Run security scan"
+	@echo "📊 Quick Start:"
+	@echo "  🐳 Full Docker:   make docker-setup"
+	@echo "  💻 Development:   make dev-start && make run"
+	@echo ""
+	@echo "🌐 After setup, API available at: http://localhost:3333"

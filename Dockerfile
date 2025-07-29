@@ -1,11 +1,18 @@
-FROM golang:1.24.2-alpine AS base
+# Development Dockerfile
+FROM golang:1.24.2-alpine
 
-# Install dependencies
-RUN apk add --no-cache git ca-certificates
+# Install dependencies for development
+RUN apk add --no-cache git ca-certificates tzdata
+
+# Install tern migration tool
+RUN go install github.com/jackc/tern/v2@latest
+
+# Set timezone
+ENV TZ=America/Sao_Paulo
 
 WORKDIR /app
 
-# Copy go mod and sum files
+# Copy go mod and sum files first for better caching
 COPY go.mod go.sum ./
 
 # Download dependencies
@@ -14,11 +21,8 @@ RUN go mod download
 # Copy source code
 COPY . .
 
-# For development - we'll run commands directly
-# The actual command will be specified in docker-compose.yml
-
 # Expose port
 EXPOSE 3333
 
-# Default command (can be overridden in docker-compose)
+# Default command for development (can be overridden in docker-compose)
 CMD ["go", "run", "cmd/server/main.go"]

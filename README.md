@@ -73,41 +73,47 @@ This project follows Clean Architecture principles with clear separation of conc
 
 ### Using Docker (Recommended)
 
-1. **Clone the repository**
+1. **Complete setup in one command**
    ```bash
-   git clone https://github.com/othavioBF/pandoragym-go-api.git
-   cd pandoragym-go-api
+   make docker-setup
+   ```
+
+2. **The API will be available at**: `http://localhost:3333`
+
+### Manual Development Setup
+
+1. **Start development environment**
+   ```bash
+   make dev-start
    ```
 
 2. **Start the application**
    ```bash
-   make docker-run
-   ```
-
-3. **The API will be available at**: `http://localhost:3333`
-
-### Manual Setup
-
-1. **Install dependencies**
-   ```bash
-   go mod download
-   ```
-
-2. **Set up environment variables**
-   ```bash
-   cp .env.example .env
-   # Edit .env with your database credentials
-   ```
-
-3. **Run database migrations**
-   ```bash
-   make migrate-up
-   ```
-
-4. **Start the application**
-   ```bash
    make run
    ```
+
+## 🔧 Available Commands
+
+Run `make help` to see all available commands:
+
+### 🐳 Docker Commands (Full Environment)
+- `make docker-setup` - Complete Docker setup (recommended)
+- `make docker-run` - Start containers
+- `make docker-stop` - Stop containers
+- `make docker-migrate` - Run migrations in Docker
+- `make docker-seed` - Run seed in Docker
+- `make docker-status` - Show container status
+
+### 💻 Development Commands
+- `make dev-start` - Start dev environment (DB in Docker, app local)
+- `make run` - Run application locally
+- `make build` - Build application binary
+- `make test` - Run tests
+
+### 🗄️ Database & Migrations
+- `make migrate-up` - Run migrations
+- `make seed` - Run database seed
+- `make db-shell` - Connect to database shell
 
 ## 🔧 Configuration
 
