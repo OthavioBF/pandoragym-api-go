@@ -4,10 +4,10 @@ import (
 	"context"
 
 	"github.com/google/uuid"
+	"github.com/jackc/pgx/v5"
 )
 
 type Querier interface {
-	// User operations
 	CreateUser(ctx context.Context, arg CreateUserParams) (uuid.UUID, error)
 	CreateStudent(ctx context.Context, arg CreateStudentParams) error
 	CreatePersonal(ctx context.Context, arg CreatePersonalParams) error
@@ -21,19 +21,16 @@ type Querier interface {
 	DeleteUser(ctx context.Context, id uuid.UUID) error
 	GetUserRole(ctx context.Context, id uuid.UUID) (Role, error)
 
-	// Auth operations
 	CreatePasswordResetToken(ctx context.Context, arg CreatePasswordResetTokenParams) error
 	GetPasswordResetToken(ctx context.Context, token string) (*PasswordResetToken, error)
 	MarkPasswordResetTokenAsUsed(ctx context.Context, token string) error
 
-	// Workout operations
 	CreateWorkout(ctx context.Context, arg CreateWorkoutParams) (uuid.UUID, error)
 	GetWorkouts(ctx context.Context, personalID *uuid.UUID) ([]GetWorkoutsRow, error)
 	GetWorkoutById(ctx context.Context, arg GetWorkoutByIdParams) (*GetWorkoutByIdRow, error)
 	UpdateWorkout(ctx context.Context, arg UpdateWorkoutParams) error
 	DeleteWorkout(ctx context.Context, arg DeleteWorkoutParams) error
 
-	// Exercise operations
 	CreateExercise(ctx context.Context, arg CreateExerciseParams) (uuid.UUID, error)
 	GetExercises(ctx context.Context, personalID *uuid.UUID) ([]ExercisesTemplate, error)
 	GetExerciseById(ctx context.Context, arg GetExerciseByIdParams) (*ExercisesTemplate, error)
@@ -43,7 +40,6 @@ type Querier interface {
 	AddExerciseToWorkout(ctx context.Context, arg AddExerciseToWorkoutParams) (uuid.UUID, error)
 	RemoveExerciseFromWorkout(ctx context.Context, arg RemoveExerciseFromWorkoutParams) error
 
-	// Scheduling operations
 	CreateScheduling(ctx context.Context, arg CreateSchedulingParams) (uuid.UUID, error)
 	GetSchedulings(ctx context.Context, personalID uuid.UUID) ([]Scheduling, error)
 	GetSchedulingById(ctx context.Context, arg GetSchedulingByIdParams) (*Scheduling, error)
@@ -53,8 +49,7 @@ type Querier interface {
 	UpdateSchedulingWithCanceledTime(ctx context.Context, arg UpdateSchedulingWithCanceledTimeParams) error
 	CreateSchedulingHistory(ctx context.Context, arg CreateSchedulingHistoryParams) (uuid.UUID, error)
 
-	// Transaction support
-	WithTx(tx any) *Queries
+	WithTx(tx pgx.Tx) *Queries
 }
 
 var _ Querier = (*Queries)(nil)

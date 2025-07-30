@@ -7,49 +7,45 @@ import (
 	"fmt"
 	"time"
 
-	"github.com/golang-jwt/jwt/v5"
+	"github.com/alexedwards/scs/v2"
 	"github.com/google/uuid"
 	"github.com/othavioBF/pandoragym-go-api/internal/infra/pgstore"
 	"golang.org/x/crypto/bcrypt"
 )
 
 type AuthService struct {
-	queries   *pgstore.Queries
-	jwtSecret string
+	queries        *pgstore.Queries
+	sessionManager *scs.SessionManager
 }
 
-type TokenPair struct {
-	AccessToken  string `json:"access_token"`
-	RefreshToken string `json:"refresh_token"`
-}
-
-type Claims struct {
+type SessionData struct {
 	UserID string `json:"user_id"`
 	Role   string `json:"role"`
-	jwt.RegisteredClaims
+	Email  string `json:"email"`
+	Name   string `json:"name"`
 }
 
-func NewAuthService(queries *pgstore.Queries, jwtSecret string) *AuthService {
+func NewAuthService(queries *pgstore.Queries, sessionManager *scs.SessionManager) *AuthService {
 	return &AuthService{
-		queries:   queries,
-		jwtSecret: jwtSecret,
+		queries:        queries,
+		sessionManager: sessionManager,
 	}
 }
 
-func (s *AuthService) AuthenticateWithPassword(ctx context.Context, email, password string) (*TokenPair, *pgstore.UserResponse, error) {
+func (s *AuthService) AuthenticateWithPassword(ctx context.Context, email, password string) (*pgstore.UserResponse, error) {
 	user, err := s.queries.GetUserByEmail(ctx, email)
 	if err != nil {
-		return nil, nil, fmt.Errorf("user not found")
+		return nil, fmt.Errorf("user not found")
 	}
 
 	if !s.verifyPassword(password, user.Password) {
-		return nil, nil, fmt.Errorf("invalid credentials")
+		return nil, fmt.Errorf("invalid credentials")
 	}
 
-	tokens, err := s.generateTokenPair(user.ID.String(), string(user.Role))
-	if err != nil {
-		return nil, nil, fmt.Errorf("failed to generate tokens: %w", err)
-	}
+	s.sessionManager.Put(ctx, "user_id", user.ID.String())
+	s.sessionManager.Put(ctx, "role", string(user.Role))
+	s.sessionManager.Put(ctx, "email", user.Email)
+	s.sessionManager.Put(ctx, "name", user.Name)
 
 	userResponse := &pgstore.UserResponse{
 		ID:        user.ID,
@@ -62,15 +58,65 @@ func (s *AuthService) AuthenticateWithPassword(ctx context.Context, email, passw
 		UpdatedAt: user.UpdatedAt,
 	}
 
-	return tokens, userResponse, nil
+	return userResponse, nil
 }
 
-func (s *AuthService) RefreshToken(ctx context.Context, refreshToken string) (*TokenPair, error) {
-	return nil, fmt.Errorf("refresh token functionality not implemented yet")
+func (s *AuthService) GetSessionData(ctx context.Context) (*SessionData, error) {
+	userID := s.sessionManager.GetString(ctx, "user_id")
+	if userID == "" {
+		return nil, fmt.Errorf("no active session")
+	}
+
+	role := s.sessionManager.GetString(ctx, "role")
+	email := s.sessionManager.GetString(ctx, "email")
+	name := s.sessionManager.GetString(ctx, "name")
+
+	return &SessionData{
+		UserID: userID,
+		Role:   role,
+		Email:  email,
+		Name:   name,
+	}, nil
 }
 
-func (s *AuthService) RevokeToken(ctx context.Context, refreshToken string) error {
-	return fmt.Errorf("token revocation not implemented yet")
+func (s *AuthService) IsAuthenticated(ctx context.Context) bool {
+	userID := s.sessionManager.GetString(ctx, "user_id")
+	return userID != ""
+}
+
+func (s *AuthService) GetUserIDFromSession(ctx context.Context) (uuid.UUID, error) {
+	userIDStr := s.sessionManager.GetString(ctx, "user_id")
+	if userIDStr == "" {
+		return uuid.Nil, fmt.Errorf("no user in session")
+	}
+
+	userID, err := uuid.Parse(userIDStr)
+	if err != nil {
+		return uuid.Nil, fmt.Errorf("invalid user ID in session: %w", err)
+	}
+
+	return userID, nil
+}
+
+func (s *AuthService) GetUserRoleFromSession(ctx context.Context) (string, error) {
+	role := s.sessionManager.GetString(ctx, "role")
+	if role == "" {
+		return "", fmt.Errorf("no role in session")
+	}
+
+	return role, nil
+}
+
+func (s *AuthService) Logout(ctx context.Context) error {
+	return s.sessionManager.Destroy(ctx)
+}
+
+func (s *AuthService) RefreshSession(ctx context.Context) error {
+	if !s.IsAuthenticated(ctx) {
+		return fmt.Errorf("no active session to refresh")
+	}
+
+	return s.sessionManager.RenewToken(ctx)
 }
 
 func (s *AuthService) CreateStudentWithUser(ctx context.Context, req pgstore.CreateStudentWithUserRequest) (*pgstore.UserResponse, error) {
@@ -167,43 +213,6 @@ func (s *AuthService) InitiatePasswordRecovery(ctx context.Context, email string
 
 func (s *AuthService) ResetPassword(ctx context.Context, token, newPassword string) error {
 	return fmt.Errorf("password reset not implemented yet")
-}
-
-func (s *AuthService) generateTokenPair(userID, role string) (*TokenPair, error) {
-	accessClaims := Claims{
-		UserID: userID,
-		Role:   role,
-		RegisteredClaims: jwt.RegisteredClaims{
-			ExpiresAt: jwt.NewNumericDate(time.Now().Add(15 * time.Minute)),
-			IssuedAt:  jwt.NewNumericDate(time.Now()),
-		},
-	}
-
-	accessToken := jwt.NewWithClaims(jwt.SigningMethodHS256, accessClaims)
-	accessTokenString, err := accessToken.SignedString([]byte(s.jwtSecret))
-	if err != nil {
-		return nil, err
-	}
-
-	refreshClaims := Claims{
-		UserID: userID,
-		Role:   role,
-		RegisteredClaims: jwt.RegisteredClaims{
-			ExpiresAt: jwt.NewNumericDate(time.Now().Add(7 * 24 * time.Hour)),
-			IssuedAt:  jwt.NewNumericDate(time.Now()),
-		},
-	}
-
-	refreshToken := jwt.NewWithClaims(jwt.SigningMethodHS256, refreshClaims)
-	refreshTokenString, err := refreshToken.SignedString([]byte(s.jwtSecret))
-	if err != nil {
-		return nil, err
-	}
-
-	return &TokenPair{
-		AccessToken:  accessTokenString,
-		RefreshToken: refreshTokenString,
-	}, nil
 }
 
 func (s *AuthService) hashPassword(password string) (string, error) {

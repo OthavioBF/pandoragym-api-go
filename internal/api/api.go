@@ -3,6 +3,7 @@ package api
 import (
 	"log/slog"
 
+	"github.com/alexedwards/scs/v2"
 	"github.com/go-chi/chi/v5"
 	"github.com/othavioBF/pandoragym-go-api/internal/services"
 )
@@ -17,4 +18,5 @@ type API struct {
 	AnalyticsService  *services.AnalyticsService
 	PlanService       *services.PlanService
 	SystemService     services.SystemService
+	SessionManager    *scs.SessionManager
 }

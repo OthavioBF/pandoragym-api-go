@@ -16,7 +16,7 @@ func (api *API) AuthenticateWithPassword(w http.ResponseWriter, r *http.Request)
 		return
 	}
 
-	tokens, user, err := api.AuthService.AuthenticateWithPassword(r.Context(), req.Email, req.Password)
+	user, err := api.AuthService.AuthenticateWithPassword(r.Context(), req.Email, req.Password)
 	if err != nil {
 		api.Logger.Error("Authentication failed", "error", err, "email", req.Email)
 		utils.WriteErrorResponse(w, http.StatusUnauthorized, "Invalid credentials")
@@ -24,9 +24,8 @@ func (api *API) AuthenticateWithPassword(w http.ResponseWriter, r *http.Request)
 	}
 
 	utils.WriteJSONResponse(w, http.StatusOK, map[string]interface{}{
-		"access_token":  tokens.AccessToken,
-		"refresh_token": tokens.RefreshToken,
-		"user":          user,
+		"message": "Authentication successful",
+		"user":    user,
 	})
 }
 
@@ -108,42 +107,28 @@ func (api *API) ResetPassword(w http.ResponseWriter, r *http.Request) {
 }
 
 func (api *API) RefreshToken(w http.ResponseWriter, r *http.Request) {
-	req, err := utils.DecodeValidJSON[struct {
-		RefreshToken string `json:"refresh_token" validate:"required"`
-	}](r)
+	err := api.AuthService.RefreshSession(r.Context())
 	if err != nil {
-		utils.WriteErrorResponse(w, http.StatusBadRequest, err.Error())
-		return
-	}
-
-	tokens, err := api.AuthService.RefreshToken(r.Context(), req.RefreshToken)
-	if err != nil {
-		api.Logger.Error("Token refresh failed", "error", err)
-		utils.WriteErrorResponse(w, http.StatusUnauthorized, "Invalid refresh token")
-		return
-	}
-
-	utils.WriteJSONResponse(w, http.StatusOK, tokens)
-}
-
-func (api *API) RevokeToken(w http.ResponseWriter, r *http.Request) {
-	req, err := utils.DecodeValidJSON[struct {
-		RefreshToken string `json:"refresh_token" validate:"required"`
-	}](r)
-	if err != nil {
-		utils.WriteErrorResponse(w, http.StatusBadRequest, err.Error())
-		return
-	}
-
-	err = api.AuthService.RevokeToken(r.Context(), req.RefreshToken)
-	if err != nil {
-		api.Logger.Error("Token revocation failed", "error", err)
-		utils.WriteErrorResponse(w, http.StatusBadRequest, "Failed to revoke token")
+		api.Logger.Error("Session refresh failed", "error", err)
+		utils.WriteErrorResponse(w, http.StatusUnauthorized, "Failed to refresh session")
 		return
 	}
 
 	utils.WriteJSONResponse(w, http.StatusOK, map[string]string{
-		"message": "Token revoked successfully",
+		"message": "Session refreshed successfully",
+	})
+}
+
+func (api *API) RevokeToken(w http.ResponseWriter, r *http.Request) {
+	err := api.AuthService.Logout(r.Context())
+	if err != nil {
+		api.Logger.Error("Logout failed", "error", err)
+		utils.WriteErrorResponse(w, http.StatusBadRequest, "Failed to logout")
+		return
+	}
+
+	utils.WriteJSONResponse(w, http.StatusOK, map[string]string{
+		"message": "Logged out successfully",
 	})
 }
 
