@@ -6,16 +6,19 @@ import (
 	"time"
 
 	"github.com/google/uuid"
+	"github.com/jackc/pgx/v5/pgxpool"
 	"github.com/othavioBF/pandoragym-go-api/internal/infra/pgstore"
 )
 
 type WorkoutService struct {
 	queries *pgstore.Queries
+	pool    *pgxpool.Pool
 }
 
-func NewWorkoutService(queries *pgstore.Queries) *WorkoutService {
+func NewWorkoutService(queries *pgstore.Queries, pool *pgxpool.Pool) *WorkoutService {
 	return &WorkoutService{
 		queries: queries,
+		pool:    pool,
 	}
 }
 
@@ -76,17 +79,20 @@ func (s *WorkoutService) CreateWorkout(ctx context.Context, req pgstore.CreateWo
 		personalID = &userID
 	}
 
-	err = s.queries.CreateWorkout(ctx, pgstore.CreateWorkoutParams{
+	tx, err := s.pool.Begin(ctx)
+	if err != nil {
+		return nil, fmt.Errorf("failed to begin transaction: %w", err)
+	}
+	defer tx.Rollback(ctx)
+
+	txQueries := s.queries.WithTx(tx)
+
+	createdWorkoutID, err := txQueries.CreateWorkout(ctx, pgstore.CreateWorkoutParams{
 		ID:          workoutID,
 		Name:        req.Name,
-		Description: req.Description,
+		Description: &req.Description,
 		Thumbnail:   req.Thumbnail,
-		Category:    req.Category,
-		Difficulty:  req.Difficulty,
-		Duration:    req.Duration,
-		WeekDays:    req.WeekDays,
 		PersonalID:  personalID,
-		IsPublic:    req.IsPublic,
 		CreatedAt:   time.Now(),
 		UpdatedAt:   time.Now(),
 	})
@@ -97,10 +103,10 @@ func (s *WorkoutService) CreateWorkout(ctx context.Context, req pgstore.CreateWo
 	for _, exercise := range req.Exercises {
 		exerciseID, err := uuid.Parse(exercise.ExerciseID)
 		if err != nil {
-			continue
+			return nil, fmt.Errorf("invalid exercise ID %s: %w", exercise.ExerciseID, err)
 		}
 
-		err = s.queries.CreateWorkoutExercise(ctx, pgstore.CreateWorkoutExerciseParams{
+		err = txQueries.CreateWorkoutExercise(ctx, pgstore.CreateWorkoutExerciseParams{
 			ID:         uuid.New(),
 			WorkoutID:  workoutID,
 			ExerciseID: exerciseID,
@@ -110,21 +116,20 @@ func (s *WorkoutService) CreateWorkout(ctx context.Context, req pgstore.CreateWo
 			Order:      exercise.Order,
 		})
 		if err != nil {
-			return nil, fmt.Errorf("failed to add exercise to workout: %w", err)
+			return nil, fmt.Errorf("failed to add exercise %s to workout: %w", exercise.ExerciseID, err)
 		}
 	}
 
+	if err = tx.Commit(ctx); err != nil {
+		return nil, fmt.Errorf("failed to commit transaction: %w", err)
+	}
+
 	return &pgstore.WorkoutResponse{
-		ID:          workoutID,
+		ID:          createdWorkoutID,
 		Name:        req.Name,
-		Description: req.Description,
+		Description: &req.Description,
 		Thumbnail:   req.Thumbnail,
-		Category:    req.Category,
-		Difficulty:  req.Difficulty,
-		Duration:    req.Duration,
-		WeekDays:    req.WeekDays,
 		PersonalID:  personalID,
-		IsPublic:    req.IsPublic,
 		CreatedAt:   time.Now(),
 		UpdatedAt:   time.Now(),
 	}, nil
@@ -422,8 +427,8 @@ func (s *WorkoutService) ExecuteWorkout(ctx context.Context, userID, workoutID s
 	}
 
 	return map[string]interface{}{
-		"workout":   workout,
-		"exercises": exercises,
+		"workout":    workout,
+		"exercises":  exercises,
 		"started_at": time.Now(),
 	}, nil
 }

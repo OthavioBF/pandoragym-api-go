@@ -8,8 +8,6 @@ import (
 	"github.com/othavioBF/pandoragym-go-api/internal/utils"
 )
 
-// User analytics (for their own data)
-
 func (api *API) GetWorkoutFrequency(w http.ResponseWriter, r *http.Request) {
 	userID, ok := r.Context().Value(utils.UserIDKey).(uuid.UUID)
 	if !ok {
@@ -17,7 +15,6 @@ func (api *API) GetWorkoutFrequency(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	// Parse query parameters for date range
 	startDate := r.URL.Query().Get("start_date")
 	endDate := r.URL.Query().Get("end_date")
 
@@ -76,8 +73,6 @@ func (api *API) GetWorkoutExercisePerformanceComparison(w http.ResponseWriter, r
 
 	utils.WriteJSONResponse(w, http.StatusOK, comparison)
 }
-
-// Trainer analytics (for their students' data - requires trainer role)
 
 func (api *API) GetWorkoutFrequencyForUser(w http.ResponseWriter, r *http.Request) {
 	trainerID, ok := r.Context().Value(utils.UserIDKey).(uuid.UUID)

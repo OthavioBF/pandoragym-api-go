@@ -54,7 +54,7 @@ type Querier interface {
 	CreateSchedulingHistory(ctx context.Context, arg CreateSchedulingHistoryParams) (uuid.UUID, error)
 
 	// Transaction support
-	WithTx(tx interface{}) *Queries
+	WithTx(tx any) *Queries
 }
 
 var _ Querier = (*Queries)(nil)

@@ -21,11 +21,8 @@ type Queries struct {
 	db DBTX
 }
 
-func (q *Queries) WithTx(tx any) *Queries {
-	if pgxTx, ok := tx.(pgx.Tx); ok {
-		return &Queries{
-			db: pgxTx,
-		}
+func (q *Queries) WithTx(tx pgx.Tx) *Queries {
+	return &Queries{
+		db: tx,
 	}
-	return q
 }

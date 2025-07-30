@@ -9,8 +9,6 @@ import (
 	"github.com/othavioBF/pandoragym-go-api/internal/utils"
 )
 
-// Authentication handlers
-
 func (api *API) AuthenticateWithPassword(w http.ResponseWriter, r *http.Request) {
 	req, err := utils.DecodeValidJSON[pgstore.AuthenticateWithPasswordRequest](r)
 	if err != nil {

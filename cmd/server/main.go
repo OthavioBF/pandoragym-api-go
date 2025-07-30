@@ -34,7 +34,7 @@ func main() {
 	queries := pgstore.NewQueries(pool)
 
 	// Initialize API with dependency injection
-	api := core.InjectDependencies(queries)
+	api := core.InjectDependencies(queries, pool)
 
 	// Bind routes
 	api.BindRoutes()
