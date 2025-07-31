@@ -309,36 +309,65 @@ type UpdateProfileRequest struct {
 	Phone *string `json:"phone,omitempty"`
 }
 
+type WorkoutExercise struct {
+	ExerciseID          string `json:"exerciseId" validate:"required"`
+	Name                string `json:"name" validate:"required"`
+	Thumbnail           string `json:"thumbnail" validate:"required"`
+	VideoURL            string `json:"videoUrl" validate:"required"`
+	Sets                int32  `json:"sets" validate:"required,min=1"`
+	Reps                int32  `json:"reps" validate:"required,min=1"`
+	RestTimeBetweenSets int32  `json:"restTimeBetweenSets" validate:"min=0"`
+	Load                int32  `json:"load" validate:"min=0"`
+	Order               int32  `json:"order" validate:"min=1"`
+}
+
 type CreateWorkoutRequest struct {
-	Name        string   `json:"name" validate:"required,min=2,max=100"`
-	Description string   `json:"description" validate:"required"`
-	Thumbnail   string   `json:"thumbnail"`
-	WeekDays    *[]Day   `json:"weekDays,omitempty"`
-	Exclusive   *bool    `json:"exclusive,omitempty"`
+	Name                     string            `json:"name" validate:"required,min=2,max=100"`
+	Description              string            `json:"description" validate:"required"`
+	Thumbnail                string            `json:"thumbnail"`
+	VideoURL                 *string           `json:"videoUrl,omitempty"`
+	RestTimeBetweenExercises *int32            `json:"restTimeBetweenExercises,omitempty"`
+	Level                    *Level            `json:"level,omitempty"`
+	WeekDays                 *[]Day            `json:"weekDays,omitempty"`
+	Exclusive                *bool             `json:"exclusive,omitempty"`
+	IsTemplate               *bool             `json:"isTemplate,omitempty"`
+	Modality                 string            `json:"modality" validate:"required"`
+	Exercises                []WorkoutExercise `json:"exercises,omitempty"`
 }
 
 type UpdateWorkoutRequest struct {
-	Name        *string `json:"name,omitempty" validate:"omitempty,min=2,max=100"`
-	Description *string `json:"description,omitempty"`
-	Thumbnail   *string `json:"thumbnail,omitempty"`
-	WeekDays    *[]Day  `json:"weekDays,omitempty"`
-	Exclusive   *bool   `json:"exclusive,omitempty"`
+	Name                     *string `json:"name,omitempty" validate:"omitempty,min=2,max=100"`
+	Description              *string `json:"description,omitempty"`
+	Thumbnail                *string `json:"thumbnail,omitempty"`
+	VideoURL                 *string `json:"videoUrl,omitempty"`
+	RestTimeBetweenExercises *int32  `json:"restTimeBetweenExercises,omitempty"`
+	Level                    *Level  `json:"level,omitempty"`
+	WeekDays                 *[]Day  `json:"weekDays,omitempty"`
+	Exclusive                *bool   `json:"exclusive,omitempty"`
+	Modality                 *string `json:"modality,omitempty"`
 }
 
 type CreateExerciseRequest struct {
-	Name         string `json:"name" validate:"required,min=2,max=100"`
-	Description  string `json:"description" validate:"required"`
-	VideoURL     string `json:"videoUrl" validate:"required,url"`
-	Instructions string `json:"instructions" validate:"required"`
-	Category     string `json:"category" validate:"required"`
+	Name                string     `json:"name" validate:"required,min=2,max=100"`
+	Description         string     `json:"description" validate:"required"`
+	Thumbnail           string     `json:"thumbnail" validate:"required"`
+	VideoURL            string     `json:"videoUrl" validate:"required,url"`
+	Load                *int32     `json:"load,omitempty"`
+	Sets                int32      `json:"sets" validate:"required,min=1"`
+	Reps                int32      `json:"reps" validate:"required,min=1"`
+	RestTimeBetweenSets *int32     `json:"restTimeBetweenSets,omitempty"`
+	PersonalID          *uuid.UUID `json:"personalId,omitempty"`
 }
 
 type UpdateExerciseRequest struct {
-	Name         *string `json:"name,omitempty" validate:"omitempty,min=2,max=100"`
-	Description  *string `json:"description,omitempty"`
-	VideoURL     *string `json:"videoUrl,omitempty" validate:"omitempty,url"`
-	Instructions *string `json:"instructions,omitempty"`
-	Category     *string `json:"category,omitempty"`
+	Name                *string `json:"name,omitempty" validate:"omitempty,min=2,max=100"`
+	Description         *string `json:"description,omitempty"`
+	Thumbnail           *string `json:"thumbnail,omitempty"`
+	VideoURL            *string `json:"videoUrl,omitempty" validate:"omitempty,url"`
+	Load                *int32  `json:"load,omitempty"`
+	Sets                *int32  `json:"sets,omitempty" validate:"omitempty,min=1"`
+	Reps                *int32  `json:"reps,omitempty" validate:"omitempty,min=1"`
+	RestTimeBetweenSets *int32  `json:"restTimeBetweenSets,omitempty"`
 }
 
 type CreateSchedulingRequest struct {

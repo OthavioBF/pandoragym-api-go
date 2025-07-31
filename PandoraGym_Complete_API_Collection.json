@@ -1,0 +1,190 @@
+{
+  "info": {
+    "name": "PandoraGym Complete API Collection",
+    "description": "Complete API collection following Chi mux routing structure from routes.go",
+    "version": "1.0.0",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "variable": [
+    {"key": "baseUrl", "value": "http://localhost:3333", "type": "string"},
+    {"key": "authToken", "value": "", "type": "string"},
+    {"key": "userId", "value": "", "type": "string"},
+    {"key": "workoutId", "value": "", "type": "string"},
+    {"key": "exerciseId", "value": "", "type": "string"},
+    {"key": "trainerId", "value": "", "type": "string"},
+    {"key": "studentId", "value": "", "type": "string"},
+    {"key": "schedulingId", "value": "", "type": "string"},
+    {"key": "planId", "value": "", "type": "string"}
+  ],
+  "auth": {
+    "type": "bearer",
+    "bearer": [{"key": "token", "value": "{{authToken}}", "type": "string"}]
+  },
+  "event": [
+    {
+      "listen": "test",
+      "script": {
+        "type": "text/javascript",
+        "exec": [
+          "if (pm.response.code === 200 || pm.response.code === 201) {",
+          "    try {",
+          "        const response = pm.response.json();",
+          "        if (response.token) pm.collectionVariables.set('authToken', response.token);",
+          "        if (response.user && response.user.id) pm.collectionVariables.set('userId', response.user.id);",
+          "        if (response.id) pm.collectionVariables.set('lastCreatedId', response.id);",
+          "    } catch (e) {}",
+          "}"
+        ]
+      }
+    }
+  ],
+  "item": [
+    {
+      "name": "Health Check",
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": {"raw": "{{baseUrl}}/health", "host": ["{{baseUrl}}"], "path": ["health"]}
+      }
+    },
+    {
+      "name": "Upload File",
+      "request": {
+        "method": "POST",
+        "header": [],
+        "body": {"mode": "formdata", "formdata": [{"key": "file", "type": "file", "src": []}]},
+        "url": {"raw": "{{baseUrl}}/upload", "host": ["{{baseUrl}}"], "path": ["upload"]}
+      }
+    },
+    {
+      "name": "auth",
+      "item": [
+        {
+          "name": "Login (POST /auth/session)",
+          "request": {
+            "method": "POST",
+            "header": [{"key": "Content-Type", "value": "application/json"}],
+            "body": {"mode": "raw", "raw": "{\n  \"email\": \"user@example.com\",\n  \"password\": \"password123\"\n}"},
+            "url": {"raw": "{{baseUrl}}/auth/session", "host": ["{{baseUrl}}"], "path": ["auth", "session"]}
+          }
+        },
+        {
+          "name": "Register Student (POST /auth/register/student)",
+          "request": {
+            "method": "POST",
+            "header": [{"key": "Content-Type", "value": "application/json"}],
+            "body": {"mode": "raw", "raw": "{\n  \"name\": \"John Doe\",\n  \"email\": \"john@example.com\",\n  \"phone\": \"+1234567890\",\n  \"password\": \"password123\",\n  \"bornDate\": \"1990-01-01\",\n  \"age\": 33,\n  \"weight\": 75.5,\n  \"objective\": \"Lose weight and gain muscle\",\n  \"trainingFrequency\": \"3-4 times per week\",\n  \"didBodybuilding\": false,\n  \"medicalCondition\": \"None\",\n  \"physicalActivityLevel\": \"Beginner\",\n  \"observations\": \"Looking to start a fitness journey\"\n}"},
+            "url": {"raw": "{{baseUrl}}/auth/register/student", "host": ["{{baseUrl}}"], "path": ["auth", "register", "student"]}
+          }
+        },
+        {
+          "name": "Register Personal Trainer (POST /auth/register/personal)",
+          "request": {
+            "method": "POST",
+            "header": [{"key": "Content-Type", "value": "application/json"}],
+            "body": {"mode": "raw", "raw": "{\n  \"name\": \"Jane Smith\",\n  \"email\": \"jane@example.com\",\n  \"phone\": \"+1234567891\",\n  \"password\": \"password123\",\n  \"description\": \"Certified personal trainer with 5 years experience\",\n  \"experience\": \"5 years\",\n  \"specialization\": \"Weight loss, Strength training\",\n  \"qualifications\": \"NASM-CPT, ACSM-CPT\"\n}"},
+            "url": {"raw": "{{baseUrl}}/auth/register/personal", "host": ["{{baseUrl}}"], "path": ["auth", "register", "personal"]}
+          }
+        },
+        {
+          "name": "Password Recovery (POST /auth/password/recover)",
+          "request": {
+            "method": "POST",
+            "header": [{"key": "Content-Type", "value": "application/json"}],
+            "body": {"mode": "raw", "raw": "{\n  \"email\": \"user@example.com\"\n}"},
+            "url": {"raw": "{{baseUrl}}/auth/password/recover", "host": ["{{baseUrl}}"], "path": ["auth", "password", "recover"]}
+          }
+        },
+        {
+          "name": "Reset Password (POST /auth/password/reset)",
+          "request": {
+            "method": "POST",
+            "header": [{"key": "Content-Type", "value": "application/json"}],
+            "body": {"mode": "raw", "raw": "{\n  \"token\": \"reset-token-here\",\n  \"newPassword\": \"newpassword123\"\n}"},
+            "url": {"raw": "{{baseUrl}}/auth/password/reset", "host": ["{{baseUrl}}"], "path": ["auth", "password", "reset"]}
+          }
+        },
+        {
+          "name": "Refresh Token (POST /auth/refresh)",
+          "request": {
+            "method": "POST",
+            "header": [{"key": "Content-Type", "value": "application/json"}],
+            "body": {"mode": "raw", "raw": "{\n  \"refreshToken\": \"refresh-token-here\"\n}"},
+            "url": {"raw": "{{baseUrl}}/auth/refresh", "host": ["{{baseUrl}}"], "path": ["auth", "refresh"]}
+          }
+        },
+        {
+          "name": "Revoke Token (POST /auth/revoke)",
+          "request": {
+            "method": "POST",
+            "header": [{"key": "Content-Type", "value": "application/json"}],
+            "body": {"mode": "raw", "raw": "{\n  \"refreshToken\": \"refresh-token-here\"\n}"},
+            "url": {"raw": "{{baseUrl}}/auth/revoke", "host": ["{{baseUrl}}"], "path": ["auth", "revoke"]}
+          }
+        },
+        {
+          "name": "Get Profile (GET /auth/profile)",
+          "request": {
+            "method": "GET",
+            "header": [{"key": "Authorization", "value": "Bearer {{authToken}}"}],
+            "url": {"raw": "{{baseUrl}}/auth/profile", "host": ["{{baseUrl}}"], "path": ["auth", "profile"]}
+          }
+        },
+        {
+          "name": "Update Profile (PUT /auth/profile)",
+          "request": {
+            "method": "PUT",
+            "header": [{"key": "Authorization", "value": "Bearer {{authToken}}"}, {"key": "Content-Type", "value": "application/json"}],
+            "body": {"mode": "raw", "raw": "{\n  \"name\": \"Updated Name\",\n  \"phone\": \"+1234567892\"\n}"},
+            "url": {"raw": "{{baseUrl}}/auth/profile", "host": ["{{baseUrl}}"], "path": ["auth", "profile"]}
+          }
+        },
+        {
+          "name": "Upload Avatar (POST /auth/avatar)",
+          "request": {
+            "method": "POST",
+            "header": [{"key": "Authorization", "value": "Bearer {{authToken}}"}],
+            "body": {"mode": "formdata", "formdata": [{"key": "avatar", "type": "file", "src": []}]},
+            "url": {"raw": "{{baseUrl}}/auth/avatar", "host": ["{{baseUrl}}"], "path": ["auth", "avatar"]}
+          }
+        }
+      ]
+    },
+    {
+      "name": "api",
+      "item": [
+        {
+          "name": "users",
+          "item": [
+            {
+              "name": "Get Profile (GET /api/users/profile)",
+              "request": {
+                "method": "GET",
+                "header": [{"key": "Authorization", "value": "Bearer {{authToken}}"}],
+                "url": {"raw": "{{baseUrl}}/api/users/profile", "host": ["{{baseUrl}}"], "path": ["api", "users", "profile"]}
+              }
+            },
+            {
+              "name": "Update Profile (PUT /api/users/profile)",
+              "request": {
+                "method": "PUT",
+                "header": [{"key": "Authorization", "value": "Bearer {{authToken}}"}, {"key": "Content-Type", "value": "application/json"}],
+                "body": {"mode": "raw", "raw": "{\n  \"name\": \"Updated Name\",\n  \"phone\": \"+1234567890\",\n  \"weight\": 80.5,\n  \"objective\": \"Build muscle mass\"\n}"},
+                "url": {"raw": "{{baseUrl}}/api/users/profile", "host": ["{{baseUrl}}"], "path": ["api", "users", "profile"]}
+              }
+            },
+            {
+              "name": "Upload Avatar (POST /api/users/avatar)",
+              "request": {
+                "method": "POST",
+                "header": [{"key": "Authorization", "value": "Bearer {{authToken}}"}],
+                "body": {"mode": "formdata", "formdata": [{"key": "avatar", "type": "file", "src": []}]},
+                "url": {"raw": "{{baseUrl}}/api/users/avatar", "host": ["{{baseUrl}}"], "path": ["api", "users", "avatar"]}
+              }
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

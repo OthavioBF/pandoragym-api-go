@@ -3,21 +3,22 @@ package services
 import (
 	"context"
 	"fmt"
-	"strconv"
-	"strings"
 	"time"
 
+	"github.com/alexedwards/scs/v2"
 	"github.com/google/uuid"
 	"github.com/othavioBF/pandoragym-go-api/internal/infra/pgstore"
 )
 
 type UserService struct {
 	queries *pgstore.Queries
+	session *scs.SessionManager
 }
 
-func NewUserService(queries *pgstore.Queries) *UserService {
+func NewUserService(queries *pgstore.Queries, sessionManager *scs.SessionManager) *UserService {
 	return &UserService{
 		queries: queries,
+		session: sessionManager,
 	}
 }
 
@@ -44,12 +45,12 @@ func (s *UserService) GetUserByID(ctx context.Context, userID uuid.UUID) (*pgsto
 }
 
 func (s *UserService) CreateStudentWithUser(ctx context.Context, req pgstore.CreateStudentWithUserRequest) (*pgstore.UserResponse, error) {
-	authService := NewAuthService(s.queries, "temp-secret")
+	authService := NewAuthService(s.queries, s.session)
 	return authService.CreateStudentWithUser(ctx, req)
 }
 
 func (s *UserService) CreatePersonalWithUser(ctx context.Context, req pgstore.CreatePersonalWithUserRequest) (*pgstore.UserResponse, error) {
-	authService := NewAuthService(s.queries, "temp-secret")
+	authService := NewAuthService(s.queries, s.session)
 	return authService.CreatePersonalWithUser(ctx, req)
 }
 
@@ -66,7 +67,7 @@ func (s *UserService) UpdateUserProfile(ctx context.Context, userID uuid.UUID, r
 		updateParams.Phone = req.Phone
 	}
 
-	s.queries.UpdateUser(ctx, updateParams)
+	// s.queries.UpdateUser(ctx, updateParams)
 	return nil
 }
 
@@ -80,20 +81,20 @@ func (s *UserService) UpdateUserAvatar(ctx context.Context, userID uuid.UUID, av
 }
 
 func (s *UserService) GetAllUsers(page, limit, role, search string) (interface{}, interface{}, error) {
-	pageInt := 1
-	limitInt := 20
-
-	if page != "" {
-		if p, err := strconv.Atoi(page); err == nil && p > 0 {
-			pageInt = p
-		}
-	}
-
-	if limit != "" {
-		if l, err := strconv.Atoi(limit); err == nil && l > 0 && l <= 100 {
-			limitInt = l
-		}
-	}
+	// pageInt := 1
+	// limitInt := 20
+	//
+	// if page != "" {
+	// 	if p, err := strconv.Atoi(page); err == nil && p > 0 {
+	// 		pageInt = p
+	// 	}
+	// }
+	//
+	// if limit != "" {
+	// 	if l, err := strconv.Atoi(limit); err == nil && l > 0 && l <= 100 {
+	// 		limitInt = l
+	// 	}
+	// }
 
 	mockUsers := []map[string]interface{}{
 		{

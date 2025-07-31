@@ -23,7 +23,7 @@ func (api *API) AuthenticateWithPassword(w http.ResponseWriter, r *http.Request)
 		return
 	}
 
-	utils.WriteJSONResponse(w, http.StatusOK, map[string]interface{}{
+	utils.WriteJSONResponse(w, http.StatusOK, map[string]any{
 		"message": "Authentication successful",
 		"user":    user,
 	})

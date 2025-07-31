@@ -17,6 +17,17 @@
 # Go workspace file
 go.work
 
+# Air hot reload
+tmp/
+build-errors.log
+
+# Production environment and secrets
+.env.prod
+nginx/ssl/*.pem
+nginx/ssl/*.key
+nginx/logs/*.log
+backups/*.sql
+
 # Environment variables
 .env
 .env.local

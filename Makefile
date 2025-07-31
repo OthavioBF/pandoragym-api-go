@@ -48,7 +48,6 @@ lint:
 # Docker Commands
 # =============================================================================
 
-# Complete Docker setup (recommended for first time)
 docker-setup:
 	@echo "🚀 Setting up complete Docker environment..."
 	@make docker-run
@@ -59,45 +58,52 @@ docker-setup:
 	@echo "🎉 Complete Docker environment ready!"
 	@echo "🌐 App available at http://localhost:3333"
 
-# Start Docker containers
 docker-run:
-	@echo "🚀 Starting Docker containers..."
-	docker-compose up -d
+	@echo "🚀 Starting Docker containers with hot reload..."
+	docker-compose up -d --build
 	@echo "⏳ Waiting for services to be ready..."
-	@sleep 10
-	@echo "✅ Containers started!"
-	@echo "💡 Run 'make docker-migrate' and 'make docker-seed' if needed"
+	@sleep 15
+	@echo "🔍 Checking if API is running..."
+	@for i in $$(seq 1 30); do \
+		if curl -s -f http://localhost:3333/health > /dev/null 2>&1; then \
+			echo "✅ API is running at http://localhost:3333 with hot reload enabled"; \
+			echo "🔥 Code changes will automatically trigger rebuilds"; \
+			exit 0; \
+		fi; \
+		echo "⏳ Waiting for API... ($$i/30)"; \
+		sleep 2; \
+	done; \
+	echo "❌ API failed to start after 60 seconds"; \
+	echo "📋 Application logs:"; \
+	docker-compose logs --tail=20 app; \
+	echo "🛑 Stopping containers due to API failure..."; \
+	docker-compose down; \
+	exit 1
 
-# Stop Docker containers
 docker-stop:
 	@echo "🛑 Stopping Docker containers..."
 	docker-compose down
 	@echo "✅ Containers stopped!"
 
-# Restart Docker containers
 docker-restart:
 	@echo "🔄 Restarting Docker containers..."
 	@make docker-stop
 	@make docker-run
 
-# Run migrations in Docker
 docker-migrate:
 	@echo "📊 Running migrations in Docker..."
 	docker-compose exec -e DATABASE_HOST=db -e DATABASE_PORT=5432 -e DATABASE_NAME=pandoragym_db -e DATABASE_USER=pandoragym -e DATABASE_PASSWORD=password app go run ./cmd/tern
 	@echo "✅ Migrations completed!"
 
-# Run seed in Docker
 docker-seed:
 	@echo "🌱 Running seed in Docker..."
 	docker-compose exec app go run ./cmd/seed
 	@echo "✅ Seed completed!"
 
-# Show Docker logs
 docker-logs:
 	@echo "📋 Showing application logs..."
 	docker-compose logs -f app
 
-# Show Docker container status
 docker-status:
 	@echo "📊 Docker Services Status:"
 	@echo "=========================="
@@ -223,12 +229,14 @@ help:
 	@echo "  clean            - Clean build artifacts"
 	@echo ""
 	@echo "🐳 Docker Commands (Full Environment):"
-	@echo "  docker-setup     - Complete Docker setup (recommended)"
-	@echo "  docker-run       - Start containers"
+	@echo "  docker-setup     - Complete Docker setup with hot reload (recommended)"
+	@echo "  docker-run       - Start containers with hot reload enabled"
 	@echo "  docker-stop      - Stop containers"
 	@echo "  docker-restart   - Restart containers"
 	@echo "  docker-migrate   - Run migrations in Docker"
 	@echo "  docker-seed      - Run seed in Docker"
+	@echo "  docker-watch     - Watch logs for hot reload changes"
+	@echo "  docker-test      - Test API endpoint"
 	@echo "  docker-logs      - Show app logs"
 	@echo "  docker-status    - Show container status"
 	@echo "  docker-shell     - Connect to app container"

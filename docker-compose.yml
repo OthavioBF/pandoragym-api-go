@@ -36,8 +36,9 @@ services:
         condition: service_healthy
     volumes:
       - .:/app
+      - /app/tmp  # Air temp directory
     working_dir: /app
-    command: go run cmd/server/main.go
+    command: air -c .air.toml
     restart: unless-stopped
     networks:
       - pandoragym-network

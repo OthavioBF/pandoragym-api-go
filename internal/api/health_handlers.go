@@ -13,5 +13,6 @@ func (api *API) HealthCheck(w http.ResponseWriter, r *http.Request) {
 		"timestamp": time.Now().UTC(),
 		"service":   "pandoragym-api",
 		"version":   "1.0.0",
+		"message":   "Hot reload is working! 🔥",
 	})
 }

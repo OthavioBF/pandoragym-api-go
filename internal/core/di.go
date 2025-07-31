@@ -24,7 +24,7 @@ func InjectDependencies(queries *pgstore.Queries, pool *pgxpool.Pool) api.API {
 	sessionManager.Cookie.SameSite = 3
 	sessionManager.Cookie.Secure = os.Getenv("ENV") == "production"
 
-	userService := services.NewUserService(queries)
+	userService := services.NewUserService(queries, sessionManager)
 	workoutService := services.NewWorkoutService(queries, pool)
 	schedulingService := services.NewSchedulingService(queries)
 	authService := services.NewAuthService(queries, sessionManager)
