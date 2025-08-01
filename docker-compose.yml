@@ -36,7 +36,7 @@ services:
         condition: service_healthy
     volumes:
       - .:/app
-      - /app/tmp  # Air temp directory
+      - app_tmp:/app/tmp  # Air temp directory
     working_dir: /app
     command: air -c .air.toml
     restart: unless-stopped
@@ -45,7 +45,11 @@ services:
 
 volumes:
   postgres_data:
+    name: pandoragym_postgres_data
+  app_tmp:
+    name: pandoragym_go_app
 
 networks:
   pandoragym-network:
+    name: pandoragym_network
     driver: bridge

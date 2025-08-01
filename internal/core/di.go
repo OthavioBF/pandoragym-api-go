@@ -30,6 +30,7 @@ func InjectDependencies(queries *pgstore.Queries, pool *pgxpool.Pool) api.API {
 	authService := services.NewAuthService(queries, sessionManager)
 	analyticsService := services.NewAnalyticsService(queries)
 	planService := services.NewPlanService(queries)
+	fileService := services.NewFileService(queries)
 	systemService := services.NewSystemService()
 
 	return api.API{
@@ -43,5 +44,6 @@ func InjectDependencies(queries *pgstore.Queries, pool *pgxpool.Pool) api.API {
 		PlanService:       planService,
 		SystemService:     systemService,
 		SessionManager:    sessionManager,
+		FileService:       fileService,
 	}
 }

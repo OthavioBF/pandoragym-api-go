@@ -59,21 +59,26 @@ docker-setup:
 	@echo "🌐 App available at http://localhost:3333"
 
 docker-run:
-	@echo "🚀 Starting Docker containers with hot reload..."
-	docker-compose up -d --build
+	@echo "🚀 Starting Docker containers"
+	@if ! docker-compose up -d; then \
+		echo "❌ Docker failed to start trying to recover..."; \
+		echo "🛑 Running docker-stop to clean up..."; \
+		make docker-stop > /dev/null 2>&1 || true; \
+		echo "🔄 Retrying to start containers..."; \
+		docker-compose up -d; \
+	fi
 	@echo "⏳ Waiting for services to be ready..."
-	@sleep 15
+	@sleep 5
 	@echo "🔍 Checking if API is running..."
-	@for i in $$(seq 1 30); do \
+	@for i in $$(seq 1 5); do \
 		if curl -s -f http://localhost:3333/health > /dev/null 2>&1; then \
-			echo "✅ API is running at http://localhost:3333 with hot reload enabled"; \
-			echo "🔥 Code changes will automatically trigger rebuilds"; \
+			echo "✅ API is running at http://localhost:3333"; \
 			exit 0; \
 		fi; \
-		echo "⏳ Waiting for API... ($$i/30)"; \
-		sleep 2; \
+		echo "⏳ Waiting for API... ($$i/5)"; \
+		sleep 3; \
 	done; \
-	echo "❌ API failed to start after 60 seconds"; \
+	echo "❌ API failed to start"; \
 	echo "📋 Application logs:"; \
 	docker-compose logs --tail=20 app; \
 	echo "🛑 Stopping containers due to API failure..."; \
@@ -83,6 +88,18 @@ docker-run:
 docker-stop:
 	@echo "🛑 Stopping Docker containers..."
 	docker-compose down
+
+docker-clean:
+	@echo "🧹 Cleaning up Docker resources..."
+	@echo "🛑 Stopping containers..."
+	docker-compose down
+	@echo "🗑️  Removing orphaned volumes..."
+	docker volume prune -f
+	@echo "🗑️  Removing unused networks..."
+	docker network prune -f
+	@echo "🗑️  Removing unused images..."
+	docker image prune -f
+	@echo "✅ Docker cleanup complete!"
 	@echo "✅ Containers stopped!"
 
 docker-restart:
@@ -113,13 +130,6 @@ docker-status:
 docker-shell:
 	@echo "🐚 Connecting to application container..."
 	docker-compose exec app sh
-
-# Clean up Docker resources
-docker-clean:
-	@echo "🧹 Cleaning up Docker resources..."
-	docker-compose down -v
-	docker system prune -f
-	@echo "✅ Cleanup completed!"
 
 # =============================================================================
 # Database Commands (for local development)
@@ -232,6 +242,7 @@ help:
 	@echo "  docker-setup     - Complete Docker setup with hot reload (recommended)"
 	@echo "  docker-run       - Start containers with hot reload enabled"
 	@echo "  docker-stop      - Stop containers"
+	@echo "  docker-clean     - Clean up Docker resources (volumes, networks, images)"
 	@echo "  docker-restart   - Restart containers"
 	@echo "  docker-migrate   - Run migrations in Docker"
 	@echo "  docker-seed      - Run seed in Docker"

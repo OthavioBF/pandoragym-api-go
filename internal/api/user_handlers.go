@@ -106,7 +106,7 @@ func (api *API) ResetPassword(w http.ResponseWriter, r *http.Request) {
 	})
 }
 
-func (api *API) RefreshToken(w http.ResponseWriter, r *http.Request) {
+func (api *API) RefreshSession(w http.ResponseWriter, r *http.Request) {
 	err := api.AuthService.RefreshSession(r.Context())
 	if err != nil {
 		api.Logger.Error("Session refresh failed", "error", err)
@@ -131,8 +131,6 @@ func (api *API) RevokeToken(w http.ResponseWriter, r *http.Request) {
 		"message": "Logged out successfully",
 	})
 }
-
-// Profile management handlers
 
 func (api *API) GetProfile(w http.ResponseWriter, r *http.Request) {
 	userID, ok := r.Context().Value(utils.UserIDKey).(uuid.UUID)
@@ -188,7 +186,6 @@ func (api *API) UploadAvatar(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	// Parse multipart form
 	err := r.ParseMultipartForm(10 << 20) // 10 MB limit
 	if err != nil {
 		utils.WriteErrorResponse(w, http.StatusBadRequest, "Failed to parse form")
@@ -202,6 +199,7 @@ func (api *API) UploadAvatar(w http.ResponseWriter, r *http.Request) {
 	}
 	defer file.Close()
 
+	// api.FileService.UploadFile(ctx context.Context, file multipart.File, header *multipart.FileHeader)
 	// TODO: Implement file upload to storage service (S3, Supabase, etc.)
 	// For now, just return success with mock URL
 	avatarURL := "https://example.com/avatars/" + userID.String() + "_" + header.Filename
@@ -211,33 +209,6 @@ func (api *API) UploadAvatar(w http.ResponseWriter, r *http.Request) {
 	utils.WriteJSONResponse(w, http.StatusOK, map[string]string{
 		"message":    "Avatar uploaded successfully",
 		"avatar_url": avatarURL,
-	})
-}
-
-func (api *API) UploadFile(w http.ResponseWriter, r *http.Request) {
-	// Parse multipart form
-	err := r.ParseMultipartForm(10 << 20) // 10 MB limit
-	if err != nil {
-		utils.WriteErrorResponse(w, http.StatusBadRequest, "Failed to parse form")
-		return
-	}
-
-	file, header, err := r.FormFile("file")
-	if err != nil {
-		utils.WriteErrorResponse(w, http.StatusBadRequest, "No file provided")
-		return
-	}
-	defer file.Close()
-
-	// TODO: Implement file upload to storage service (S3, Supabase, etc.)
-	// For now, just return success with mock URL
-	fileURL := "https://example.com/files/" + header.Filename
-
-	api.Logger.Info("File upload requested", "filename", header.Filename)
-
-	utils.WriteJSONResponse(w, http.StatusOK, map[string]string{
-		"message":  "File uploaded successfully",
-		"file_url": fileURL,
 	})
 }
 

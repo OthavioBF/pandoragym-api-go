@@ -1,24 +1,71 @@
 {
   "info": {
     "name": "PandoraGym Complete API Collection",
-    "description": "Complete API collection following Chi mux routing structure from routes.go",
+    "description": "Complete API collection with ALL routes from routes.go",
     "version": "1.0.0",
     "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
   },
   "variable": [
-    {"key": "baseUrl", "value": "http://localhost:3333", "type": "string"},
-    {"key": "authToken", "value": "", "type": "string"},
-    {"key": "userId", "value": "", "type": "string"},
-    {"key": "workoutId", "value": "", "type": "string"},
-    {"key": "exerciseId", "value": "", "type": "string"},
-    {"key": "trainerId", "value": "", "type": "string"},
-    {"key": "studentId", "value": "", "type": "string"},
-    {"key": "schedulingId", "value": "", "type": "string"},
-    {"key": "planId", "value": "", "type": "string"}
+    {
+      "key": "baseUrl",
+      "value": "http://localhost:3333",
+      "type": "string"
+    },
+    {
+      "key": "authToken",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "userId",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "workoutId",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "exerciseId",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "trainerId",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "studentId",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "schedulingId",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "planId",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "programId",
+      "value": "",
+      "type": "string"
+    }
   ],
   "auth": {
     "type": "bearer",
-    "bearer": [{"key": "token", "value": "{{authToken}}", "type": "string"}]
+    "bearer": [
+      {
+        "key": "token",
+        "value": "{{authToken}}",
+        "type": "string"
+      }
+    ]
   },
   "event": [
     {
@@ -44,7 +91,15 @@
       "request": {
         "method": "GET",
         "header": [],
-        "url": {"raw": "{{baseUrl}}/health", "host": ["{{baseUrl}}"], "path": ["health"]}
+        "url": {
+          "raw": "{{baseUrl}}/health",
+          "host": [
+            "{{baseUrl}}"
+          ],
+          "path": [
+            "health"
+          ]
+        }
       }
     },
     {
@@ -52,8 +107,25 @@
       "request": {
         "method": "POST",
         "header": [],
-        "body": {"mode": "formdata", "formdata": [{"key": "file", "type": "file", "src": []}]},
-        "url": {"raw": "{{baseUrl}}/upload", "host": ["{{baseUrl}}"], "path": ["upload"]}
+        "body": {
+          "mode": "formdata",
+          "formdata": [
+            {
+              "key": "file",
+              "type": "file",
+              "src": []
+            }
+          ]
+        },
+        "url": {
+          "raw": "{{baseUrl}}/upload",
+          "host": [
+            "{{baseUrl}}"
+          ],
+          "path": [
+            "upload"
+          ]
+        }
       }
     },
     {
@@ -63,89 +135,270 @@
           "name": "Login (POST /auth/session)",
           "request": {
             "method": "POST",
-            "header": [{"key": "Content-Type", "value": "application/json"}],
-            "body": {"mode": "raw", "raw": "{\n  \"email\": \"user@example.com\",\n  \"password\": \"password123\"\n}"},
-            "url": {"raw": "{{baseUrl}}/auth/session", "host": ["{{baseUrl}}"], "path": ["auth", "session"]}
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": \"user@example.com\",\n  \"password\": \"password123\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/auth/session",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "auth",
+                "session"
+              ]
+            }
           }
         },
         {
           "name": "Register Student (POST /auth/register/student)",
           "request": {
             "method": "POST",
-            "header": [{"key": "Content-Type", "value": "application/json"}],
-            "body": {"mode": "raw", "raw": "{\n  \"name\": \"John Doe\",\n  \"email\": \"john@example.com\",\n  \"phone\": \"+1234567890\",\n  \"password\": \"password123\",\n  \"bornDate\": \"1990-01-01\",\n  \"age\": 33,\n  \"weight\": 75.5,\n  \"objective\": \"Lose weight and gain muscle\",\n  \"trainingFrequency\": \"3-4 times per week\",\n  \"didBodybuilding\": false,\n  \"medicalCondition\": \"None\",\n  \"physicalActivityLevel\": \"Beginner\",\n  \"observations\": \"Looking to start a fitness journey\"\n}"},
-            "url": {"raw": "{{baseUrl}}/auth/register/student", "host": ["{{baseUrl}}"], "path": ["auth", "register", "student"]}
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"John Doe\",\n  \"email\": \"john@example.com\",\n  \"phone\": \"+1234567890\",\n  \"password\": \"password123\",\n  \"bornDate\": \"1990-01-01\",\n  \"age\": 33,\n  \"weight\": 75.5,\n  \"objective\": \"Lose weight and gain muscle\",\n  \"trainingFrequency\": \"3-4 times per week\",\n  \"didBodybuilding\": false,\n  \"medicalCondition\": \"None\",\n  \"physicalActivityLevel\": \"Beginner\",\n  \"observations\": \"Looking to start a fitness journey\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/auth/register/student",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "auth",
+                "register",
+                "student"
+              ]
+            }
           }
         },
         {
           "name": "Register Personal Trainer (POST /auth/register/personal)",
           "request": {
             "method": "POST",
-            "header": [{"key": "Content-Type", "value": "application/json"}],
-            "body": {"mode": "raw", "raw": "{\n  \"name\": \"Jane Smith\",\n  \"email\": \"jane@example.com\",\n  \"phone\": \"+1234567891\",\n  \"password\": \"password123\",\n  \"description\": \"Certified personal trainer with 5 years experience\",\n  \"experience\": \"5 years\",\n  \"specialization\": \"Weight loss, Strength training\",\n  \"qualifications\": \"NASM-CPT, ACSM-CPT\"\n}"},
-            "url": {"raw": "{{baseUrl}}/auth/register/personal", "host": ["{{baseUrl}}"], "path": ["auth", "register", "personal"]}
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"Jane Smith\",\n  \"email\": \"jane@example.com\",\n  \"phone\": \"+1234567891\",\n  \"password\": \"password123\",\n  \"description\": \"Certified personal trainer with 5 years experience\",\n  \"experience\": \"5 years\",\n  \"specialization\": \"Weight loss, Strength training\",\n  \"qualifications\": \"NASM-CPT, ACSM-CPT\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/auth/register/personal",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "auth",
+                "register",
+                "personal"
+              ]
+            }
           }
         },
         {
           "name": "Password Recovery (POST /auth/password/recover)",
           "request": {
             "method": "POST",
-            "header": [{"key": "Content-Type", "value": "application/json"}],
-            "body": {"mode": "raw", "raw": "{\n  \"email\": \"user@example.com\"\n}"},
-            "url": {"raw": "{{baseUrl}}/auth/password/recover", "host": ["{{baseUrl}}"], "path": ["auth", "password", "recover"]}
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": \"user@example.com\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/auth/password/recover",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "auth",
+                "password",
+                "recover"
+              ]
+            }
           }
         },
         {
           "name": "Reset Password (POST /auth/password/reset)",
           "request": {
             "method": "POST",
-            "header": [{"key": "Content-Type", "value": "application/json"}],
-            "body": {"mode": "raw", "raw": "{\n  \"token\": \"reset-token-here\",\n  \"newPassword\": \"newpassword123\"\n}"},
-            "url": {"raw": "{{baseUrl}}/auth/password/reset", "host": ["{{baseUrl}}"], "path": ["auth", "password", "reset"]}
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"token\": \"reset-token-here\",\n  \"newPassword\": \"newpassword123\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/auth/password/reset",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "auth",
+                "password",
+                "reset"
+              ]
+            }
           }
         },
         {
           "name": "Refresh Token (POST /auth/refresh)",
           "request": {
             "method": "POST",
-            "header": [{"key": "Content-Type", "value": "application/json"}],
-            "body": {"mode": "raw", "raw": "{\n  \"refreshToken\": \"refresh-token-here\"\n}"},
-            "url": {"raw": "{{baseUrl}}/auth/refresh", "host": ["{{baseUrl}}"], "path": ["auth", "refresh"]}
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"refreshToken\": \"refresh-token-here\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/auth/refresh",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "auth",
+                "refresh"
+              ]
+            }
           }
         },
         {
           "name": "Revoke Token (POST /auth/revoke)",
           "request": {
             "method": "POST",
-            "header": [{"key": "Content-Type", "value": "application/json"}],
-            "body": {"mode": "raw", "raw": "{\n  \"refreshToken\": \"refresh-token-here\"\n}"},
-            "url": {"raw": "{{baseUrl}}/auth/revoke", "host": ["{{baseUrl}}"], "path": ["auth", "revoke"]}
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"refreshToken\": \"refresh-token-here\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/auth/revoke",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "auth",
+                "revoke"
+              ]
+            }
           }
         },
         {
           "name": "Get Profile (GET /auth/profile)",
           "request": {
             "method": "GET",
-            "header": [{"key": "Authorization", "value": "Bearer {{authToken}}"}],
-            "url": {"raw": "{{baseUrl}}/auth/profile", "host": ["{{baseUrl}}"], "path": ["auth", "profile"]}
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{authToken}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/auth/profile",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "auth",
+                "profile"
+              ]
+            }
           }
         },
         {
           "name": "Update Profile (PUT /auth/profile)",
           "request": {
             "method": "PUT",
-            "header": [{"key": "Authorization", "value": "Bearer {{authToken}}"}, {"key": "Content-Type", "value": "application/json"}],
-            "body": {"mode": "raw", "raw": "{\n  \"name\": \"Updated Name\",\n  \"phone\": \"+1234567892\"\n}"},
-            "url": {"raw": "{{baseUrl}}/auth/profile", "host": ["{{baseUrl}}"], "path": ["auth", "profile"]}
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{authToken}}"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"Updated Name\",\n  \"phone\": \"+1234567892\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/auth/profile",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "auth",
+                "profile"
+              ]
+            }
           }
         },
         {
           "name": "Upload Avatar (POST /auth/avatar)",
           "request": {
             "method": "POST",
-            "header": [{"key": "Authorization", "value": "Bearer {{authToken}}"}],
-            "body": {"mode": "formdata", "formdata": [{"key": "avatar", "type": "file", "src": []}]},
-            "url": {"raw": "{{baseUrl}}/auth/avatar", "host": ["{{baseUrl}}"], "path": ["auth", "avatar"]}
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{authToken}}"
+              }
+            ],
+            "body": {
+              "mode": "formdata",
+              "formdata": [
+                {
+                  "key": "avatar",
+                  "type": "file",
+                  "src": []
+                }
+              ]
+            },
+            "url": {
+              "raw": "{{baseUrl}}/auth/avatar",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "auth",
+                "avatar"
+              ]
+            }
           }
         }
       ]
@@ -160,27 +413,1893 @@
               "name": "Get Profile (GET /api/users/profile)",
               "request": {
                 "method": "GET",
-                "header": [{"key": "Authorization", "value": "Bearer {{authToken}}"}],
-                "url": {"raw": "{{baseUrl}}/api/users/profile", "host": ["{{baseUrl}}"], "path": ["api", "users", "profile"]}
+                "header": [
+                  {
+                    "key": "Authorization",
+                    "value": "Bearer {{authToken}}"
+                  }
+                ],
+                "url": {
+                  "raw": "{{baseUrl}}/api/users/profile",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "api",
+                    "users",
+                    "profile"
+                  ]
+                }
               }
             },
             {
               "name": "Update Profile (PUT /api/users/profile)",
               "request": {
                 "method": "PUT",
-                "header": [{"key": "Authorization", "value": "Bearer {{authToken}}"}, {"key": "Content-Type", "value": "application/json"}],
-                "body": {"mode": "raw", "raw": "{\n  \"name\": \"Updated Name\",\n  \"phone\": \"+1234567890\",\n  \"weight\": 80.5,\n  \"objective\": \"Build muscle mass\"\n}"},
-                "url": {"raw": "{{baseUrl}}/api/users/profile", "host": ["{{baseUrl}}"], "path": ["api", "users", "profile"]}
+                "header": [
+                  {
+                    "key": "Authorization",
+                    "value": "Bearer {{authToken}}"
+                  },
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  }
+                ],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"name\": \"Updated Name\",\n  \"phone\": \"+1234567890\",\n  \"weight\": 80.5,\n  \"objective\": \"Build muscle mass\"\n}"
+                },
+                "url": {
+                  "raw": "{{baseUrl}}/api/users/profile",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "api",
+                    "users",
+                    "profile"
+                  ]
+                }
               }
             },
             {
               "name": "Upload Avatar (POST /api/users/avatar)",
               "request": {
                 "method": "POST",
-                "header": [{"key": "Authorization", "value": "Bearer {{authToken}}"}],
-                "body": {"mode": "formdata", "formdata": [{"key": "avatar", "type": "file", "src": []}]},
-                "url": {"raw": "{{baseUrl}}/api/users/avatar", "host": ["{{baseUrl}}"], "path": ["api", "users", "avatar"]}
+                "header": [
+                  {
+                    "key": "Authorization",
+                    "value": "Bearer {{authToken}}"
+                  }
+                ],
+                "body": {
+                  "mode": "formdata",
+                  "formdata": [
+                    {
+                      "key": "avatar",
+                      "type": "file",
+                      "src": []
+                    }
+                  ]
+                },
+                "url": {
+                  "raw": "{{baseUrl}}/api/users/avatar",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "api",
+                    "users",
+                    "avatar"
+                  ]
+                }
               }
+            }
+          ]
+        },
+        {
+          "name": "workouts",
+          "item": [
+            {
+              "name": "Get Workouts (GET /api/workouts)",
+              "request": {
+                "method": "GET",
+                "header": [
+                  {
+                    "key": "Authorization",
+                    "value": "Bearer {{authToken}}"
+                  }
+                ],
+                "url": {
+                  "raw": "{{baseUrl}}/api/workouts",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "api",
+                    "workouts"
+                  ]
+                }
+              }
+            },
+            {
+              "name": "Create Workout (POST /api/workouts)",
+              "request": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Authorization",
+                    "value": "Bearer {{authToken}}"
+                  },
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  }
+                ],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"name\": \"Full Body Strength Training\",\n  \"description\": \"A comprehensive full body workout\",\n  \"thumbnail\": \"https://example.com/workout.jpg\",\n  \"modality\": \"Strength Training\",\n  \"level\": \"INTERMEDIARY\",\n  \"weekDays\": [\"Seg\", \"Qua\", \"Sex\"],\n  \"exercises\": [\n    {\n      \"exerciseId\": \"550e8400-e29b-41d4-a716-446655440000\",\n      \"name\": \"Push-ups\",\n      \"thumbnail\": \"https://example.com/pushup.jpg\",\n      \"videoUrl\": \"https://example.com/pushup.mp4\",\n      \"sets\": 3,\n      \"reps\": 12,\n      \"restTimeBetweenSets\": 60,\n      \"load\": 0,\n      \"order\": 1\n    }\n  ]\n}"
+                },
+                "url": {
+                  "raw": "{{baseUrl}}/api/workouts",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "api",
+                    "workouts"
+                  ]
+                }
+              }
+            },
+            {
+              "name": "Get Workout (GET /api/workouts/{id})",
+              "request": {
+                "method": "GET",
+                "header": [
+                  {
+                    "key": "Authorization",
+                    "value": "Bearer {{authToken}}"
+                  }
+                ],
+                "url": {
+                  "raw": "{{baseUrl}}/api/workouts/{{workoutId}}",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "api",
+                    "workouts",
+                    "{{workoutId}}"
+                  ]
+                }
+              }
+            },
+            {
+              "name": "Update Workout (PUT /api/workouts/{id})",
+              "request": {
+                "method": "PUT",
+                "header": [
+                  {
+                    "key": "Authorization",
+                    "value": "Bearer {{authToken}}"
+                  },
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  }
+                ],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"name\": \"Updated Workout Name\",\n  \"description\": \"Updated description\",\n  \"level\": \"ADVANCED\"\n}"
+                },
+                "url": {
+                  "raw": "{{baseUrl}}/api/workouts/{{workoutId}}",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "api",
+                    "workouts",
+                    "{{workoutId}}"
+                  ]
+                }
+              }
+            },
+            {
+              "name": "Delete Workout (DELETE /api/workouts/{id})",
+              "request": {
+                "method": "DELETE",
+                "header": [
+                  {
+                    "key": "Authorization",
+                    "value": "Bearer {{authToken}}"
+                  }
+                ],
+                "url": {
+                  "raw": "{{baseUrl}}/api/workouts/{{workoutId}}",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "api",
+                    "workouts",
+                    "{{workoutId}}"
+                  ]
+                }
+              }
+            },
+            {
+              "name": "Add Exercise to Workout (POST /api/workouts/{id}/exercises)",
+              "request": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Authorization",
+                    "value": "Bearer {{authToken}}"
+                  },
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  }
+                ],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"exerciseId\": \"{{exerciseId}}\",\n  \"sets\": 3,\n  \"reps\": 10,\n  \"restTime\": 60\n}"
+                },
+                "url": {
+                  "raw": "{{baseUrl}}/api/workouts/{{workoutId}}/exercises",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "api",
+                    "workouts",
+                    "{{workoutId}}",
+                    "exercises"
+                  ]
+                }
+              }
+            },
+            {
+              "name": "Remove Exercise from Workout (DELETE /api/workouts/{workoutId}/exercises/{exerciseId})",
+              "request": {
+                "method": "DELETE",
+                "header": [
+                  {
+                    "key": "Authorization",
+                    "value": "Bearer {{authToken}}"
+                  }
+                ],
+                "url": {
+                  "raw": "{{baseUrl}}/api/workouts/{{workoutId}}/exercises/{{exerciseId}}",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "api",
+                    "workouts",
+                    "{{workoutId}}",
+                    "exercises",
+                    "{{exerciseId}}"
+                  ]
+                }
+              }
+            },
+            {
+              "name": "Finish Workout (POST /api/workouts/{id}/finish)",
+              "request": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Authorization",
+                    "value": "Bearer {{authToken}}"
+                  },
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  }
+                ],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"duration\": 3600,\n  \"exercises\": [\n    {\n      \"exerciseId\": \"{{exerciseId}}\",\n      \"setsCompleted\": 3,\n      \"repsCompleted\": [12, 10, 8],\n      \"weight\": [0, 0, 0]\n    }\n  ],\n  \"notes\": \"Great workout!\"\n}"
+                },
+                "url": {
+                  "raw": "{{baseUrl}}/api/workouts/{{workoutId}}/finish",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "api",
+                    "workouts",
+                    "{{workoutId}}",
+                    "finish"
+                  ]
+                }
+              }
+            },
+            {
+              "name": "Execute Workout (POST /api/workouts/{id}/execute)",
+              "request": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Authorization",
+                    "value": "Bearer {{authToken}}"
+                  },
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  }
+                ],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"startTime\": \"2025-07-30T14:00:00Z\"\n}"
+                },
+                "url": {
+                  "raw": "{{baseUrl}}/api/workouts/{{workoutId}}/execute",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "api",
+                    "workouts",
+                    "{{workoutId}}",
+                    "execute"
+                  ]
+                }
+              }
+            },
+            {
+              "name": "Rate Workout (POST /api/workouts/{id}/rate)",
+              "request": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Authorization",
+                    "value": "Bearer {{authToken}}"
+                  },
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  }
+                ],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"rating\": 5,\n  \"comment\": \"Excellent workout!\"\n}"
+                },
+                "url": {
+                  "raw": "{{baseUrl}}/api/workouts/{{workoutId}}/rate",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "api",
+                    "workouts",
+                    "{{workoutId}}",
+                    "rate"
+                  ]
+                }
+              }
+            },
+            {
+              "name": "Get Workout History (GET /api/workouts/history)",
+              "request": {
+                "method": "GET",
+                "header": [
+                  {
+                    "key": "Authorization",
+                    "value": "Bearer {{authToken}}"
+                  }
+                ],
+                "url": {
+                  "raw": "{{baseUrl}}/api/workouts/history?page=1&limit=10",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "api",
+                    "workouts",
+                    "history"
+                  ],
+                  "query": [
+                    {
+                      "key": "page",
+                      "value": "1"
+                    },
+                    {
+                      "key": "limit",
+                      "value": "10"
+                    }
+                  ]
+                }
+              }
+            },
+            {
+              "name": "Get Workout Templates (GET /api/workouts/templates)",
+              "request": {
+                "method": "GET",
+                "header": [
+                  {
+                    "key": "Authorization",
+                    "value": "Bearer {{authToken}}"
+                  }
+                ],
+                "url": {
+                  "raw": "{{baseUrl}}/api/workouts/templates?category=strength&level=INTERMEDIARY",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "api",
+                    "workouts",
+                    "templates"
+                  ],
+                  "query": [
+                    {
+                      "key": "category",
+                      "value": "strength"
+                    },
+                    {
+                      "key": "level",
+                      "value": "INTERMEDIARY"
+                    }
+                  ]
+                }
+              }
+            }
+          ]
+        },
+        {
+          "name": "exercises",
+          "item": [
+            {
+              "name": "Get Exercises (GET /api/exercises)",
+              "request": {
+                "method": "GET",
+                "header": [
+                  {
+                    "key": "Authorization",
+                    "value": "Bearer {{authToken}}"
+                  }
+                ],
+                "url": {
+                  "raw": "{{baseUrl}}/api/exercises?category=strength&muscleGroup=chest",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "api",
+                    "exercises"
+                  ],
+                  "query": [
+                    {
+                      "key": "category",
+                      "value": "strength"
+                    },
+                    {
+                      "key": "muscleGroup",
+                      "value": "chest"
+                    }
+                  ]
+                }
+              }
+            },
+            {
+              "name": "Create Exercise (POST /api/exercises)",
+              "request": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Authorization",
+                    "value": "Bearer {{authToken}}"
+                  },
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  }
+                ],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"name\": \"Bench Press\",\n  \"description\": \"Classic chest exercise using a barbell\",\n  \"thumbnail\": \"https://example.com/bench-press.jpg\",\n  \"videoUrl\": \"https://example.com/bench-press.mp4\",\n  \"load\": 60,\n  \"sets\": 3,\n  \"reps\": 8,\n  \"restTimeBetweenSets\": 120\n}"
+                },
+                "url": {
+                  "raw": "{{baseUrl}}/api/exercises",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "api",
+                    "exercises"
+                  ]
+                }
+              }
+            },
+            {
+              "name": "Get Exercise (GET /api/exercises/{id})",
+              "request": {
+                "method": "GET",
+                "header": [
+                  {
+                    "key": "Authorization",
+                    "value": "Bearer {{authToken}}"
+                  }
+                ],
+                "url": {
+                  "raw": "{{baseUrl}}/api/exercises/{{exerciseId}}",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "api",
+                    "exercises",
+                    "{{exerciseId}}"
+                  ]
+                }
+              }
+            },
+            {
+              "name": "Update Exercise (PUT /api/exercises/{id})",
+              "request": {
+                "method": "PUT",
+                "header": [
+                  {
+                    "key": "Authorization",
+                    "value": "Bearer {{authToken}}"
+                  },
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  }
+                ],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"name\": \"Updated Exercise Name\",\n  \"description\": \"Updated exercise description\",\n  \"sets\": 4,\n  \"reps\": 10,\n  \"load\": 70\n}"
+                },
+                "url": {
+                  "raw": "{{baseUrl}}/api/exercises/{{exerciseId}}",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "api",
+                    "exercises",
+                    "{{exerciseId}}"
+                  ]
+                }
+              }
+            },
+            {
+              "name": "Delete Exercise (DELETE /api/exercises/{id})",
+              "request": {
+                "method": "DELETE",
+                "header": [
+                  {
+                    "key": "Authorization",
+                    "value": "Bearer {{authToken}}"
+                  }
+                ],
+                "url": {
+                  "raw": "{{baseUrl}}/api/exercises/{{exerciseId}}",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "api",
+                    "exercises",
+                    "{{exerciseId}}"
+                  ]
+                }
+              }
+            },
+            {
+              "name": "Get Exercise Templates (GET /api/exercises/templates)",
+              "request": {
+                "method": "GET",
+                "header": [
+                  {
+                    "key": "Authorization",
+                    "value": "Bearer {{authToken}}"
+                  }
+                ],
+                "url": {
+                  "raw": "{{baseUrl}}/api/exercises/templates?difficulty=intermediate&equipment=barbell",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "api",
+                    "exercises",
+                    "templates"
+                  ],
+                  "query": [
+                    {
+                      "key": "difficulty",
+                      "value": "intermediate"
+                    },
+                    {
+                      "key": "equipment",
+                      "value": "barbell"
+                    }
+                  ]
+                }
+              }
+            }
+          ]
+        },
+        {
+          "name": "programs",
+          "item": [
+            {
+              "name": "Get All Training Programs (GET /api/programs)",
+              "request": {
+                "method": "GET",
+                "header": [
+                  {
+                    "key": "Authorization",
+                    "value": "Bearer {{authToken}}"
+                  }
+                ],
+                "url": {
+                  "raw": "{{baseUrl}}/api/programs",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "api",
+                    "programs"
+                  ]
+                }
+              }
+            },
+            {
+              "name": "Get Free Training Programs (GET /api/programs/free)",
+              "request": {
+                "method": "GET",
+                "header": [
+                  {
+                    "key": "Authorization",
+                    "value": "Bearer {{authToken}}"
+                  }
+                ],
+                "url": {
+                  "raw": "{{baseUrl}}/api/programs/free",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "api",
+                    "programs",
+                    "free"
+                  ]
+                }
+              }
+            },
+            {
+              "name": "Get Free Training Program by ID (GET /api/programs/free/{id})",
+              "request": {
+                "method": "GET",
+                "header": [
+                  {
+                    "key": "Authorization",
+                    "value": "Bearer {{authToken}}"
+                  }
+                ],
+                "url": {
+                  "raw": "{{baseUrl}}/api/programs/free/{{programId}}",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "api",
+                    "programs",
+                    "free",
+                    "{{programId}}"
+                  ]
+                }
+              }
+            }
+          ]
+        },
+        {
+          "name": "trainers",
+          "item": [
+            {
+              "name": "Get Personal Trainers List (GET /api/trainers)",
+              "request": {
+                "method": "GET",
+                "header": [
+                  {
+                    "key": "Authorization",
+                    "value": "Bearer {{authToken}}"
+                  }
+                ],
+                "url": {
+                  "raw": "{{baseUrl}}/api/trainers",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "api",
+                    "trainers"
+                  ]
+                }
+              }
+            },
+            {
+              "name": "Get Personal Trainer by ID (GET /api/trainers/{id})",
+              "request": {
+                "method": "GET",
+                "header": [
+                  {
+                    "key": "Authorization",
+                    "value": "Bearer {{authToken}}"
+                  }
+                ],
+                "url": {
+                  "raw": "{{baseUrl}}/api/trainers/{{trainerId}}",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "api",
+                    "trainers",
+                    "{{trainerId}}"
+                  ]
+                }
+              }
+            },
+            {
+              "name": "Add Trainer Comment (POST /api/trainers/{id}/comments)",
+              "request": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Authorization",
+                    "value": "Bearer {{authToken}}"
+                  },
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  }
+                ],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"comment\": \"Great trainer, very professional!\",\n  \"rating\": 5\n}"
+                },
+                "url": {
+                  "raw": "{{baseUrl}}/api/trainers/{{trainerId}}/comments",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "api",
+                    "trainers",
+                    "{{trainerId}}",
+                    "comments"
+                  ]
+                }
+              }
+            },
+            {
+              "name": "Get Trainer Comments (GET /api/trainers/{id}/comments)",
+              "request": {
+                "method": "GET",
+                "header": [
+                  {
+                    "key": "Authorization",
+                    "value": "Bearer {{authToken}}"
+                  }
+                ],
+                "url": {
+                  "raw": "{{baseUrl}}/api/trainers/{{trainerId}}/comments",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "api",
+                    "trainers",
+                    "{{trainerId}}",
+                    "comments"
+                  ]
+                }
+              }
+            },
+            {
+              "name": "Get Personal Profile (GET /api/trainers/profile) [TRAINER ONLY]",
+              "request": {
+                "method": "GET",
+                "header": [
+                  {
+                    "key": "Authorization",
+                    "value": "Bearer {{authToken}}"
+                  }
+                ],
+                "url": {
+                  "raw": "{{baseUrl}}/api/trainers/profile",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "api",
+                    "trainers",
+                    "profile"
+                  ]
+                }
+              }
+            },
+            {
+              "name": "Update Personal Profile (PUT /api/trainers/profile) [TRAINER ONLY]",
+              "request": {
+                "method": "PUT",
+                "header": [
+                  {
+                    "key": "Authorization",
+                    "value": "Bearer {{authToken}}"
+                  },
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  }
+                ],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"description\": \"Updated trainer description\",\n  \"experience\": \"6 years\",\n  \"specialization\": \"Weight loss, Strength training, Nutrition\"\n}"
+                },
+                "url": {
+                  "raw": "{{baseUrl}}/api/trainers/profile",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "api",
+                    "trainers",
+                    "profile"
+                  ]
+                }
+              }
+            },
+            {
+              "name": "Get Personal Students (GET /api/trainers/students) [TRAINER ONLY]",
+              "request": {
+                "method": "GET",
+                "header": [
+                  {
+                    "key": "Authorization",
+                    "value": "Bearer {{authToken}}"
+                  }
+                ],
+                "url": {
+                  "raw": "{{baseUrl}}/api/trainers/students",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "api",
+                    "trainers",
+                    "students"
+                  ]
+                }
+              }
+            },
+            {
+              "name": "Create Student (POST /api/trainers/students) [TRAINER ONLY]",
+              "request": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Authorization",
+                    "value": "Bearer {{authToken}}"
+                  },
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  }
+                ],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"name\": \"New Student\",\n  \"email\": \"student@example.com\",\n  \"phone\": \"+1234567890\",\n  \"objective\": \"Build muscle\",\n  \"trainingFrequency\": \"4 times per week\"\n}"
+                },
+                "url": {
+                  "raw": "{{baseUrl}}/api/trainers/students",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "api",
+                    "trainers",
+                    "students"
+                  ]
+                }
+              }
+            },
+            {
+              "name": "Get Student by ID (GET /api/trainers/students/{id}) [TRAINER ONLY]",
+              "request": {
+                "method": "GET",
+                "header": [
+                  {
+                    "key": "Authorization",
+                    "value": "Bearer {{authToken}}"
+                  }
+                ],
+                "url": {
+                  "raw": "{{baseUrl}}/api/trainers/students/{{studentId}}",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "api",
+                    "trainers",
+                    "students",
+                    "{{studentId}}"
+                  ]
+                }
+              }
+            },
+            {
+              "name": "Get Student Workouts (GET /api/trainers/students/{id}/workouts) [TRAINER ONLY]",
+              "request": {
+                "method": "GET",
+                "header": [
+                  {
+                    "key": "Authorization",
+                    "value": "Bearer {{authToken}}"
+                  }
+                ],
+                "url": {
+                  "raw": "{{baseUrl}}/api/trainers/students/{{studentId}}/workouts",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "api",
+                    "trainers",
+                    "students",
+                    "{{studentId}}",
+                    "workouts"
+                  ]
+                }
+              }
+            },
+            {
+              "name": "Get Student Evolution (GET /api/trainers/students/{id}/evolution) [TRAINER ONLY]",
+              "request": {
+                "method": "GET",
+                "header": [
+                  {
+                    "key": "Authorization",
+                    "value": "Bearer {{authToken}}"
+                  }
+                ],
+                "url": {
+                  "raw": "{{baseUrl}}/api/trainers/students/{{studentId}}/evolution",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "api",
+                    "trainers",
+                    "students",
+                    "{{studentId}}",
+                    "evolution"
+                  ]
+                }
+              }
+            },
+            {
+              "name": "Remove Student (DELETE /api/trainers/students/{id}) [TRAINER ONLY]",
+              "request": {
+                "method": "DELETE",
+                "header": [
+                  {
+                    "key": "Authorization",
+                    "value": "Bearer {{authToken}}"
+                  }
+                ],
+                "url": {
+                  "raw": "{{baseUrl}}/api/trainers/students/{{studentId}}",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "api",
+                    "trainers",
+                    "students",
+                    "{{studentId}}"
+                  ]
+                }
+              }
+            },
+            {
+              "name": "Get Trainer Plans (GET /api/trainers/plans) [TRAINER ONLY]",
+              "request": {
+                "method": "GET",
+                "header": [
+                  {
+                    "key": "Authorization",
+                    "value": "Bearer {{authToken}}"
+                  }
+                ],
+                "url": {
+                  "raw": "{{baseUrl}}/api/trainers/plans",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "api",
+                    "trainers",
+                    "plans"
+                  ]
+                }
+              }
+            },
+            {
+              "name": "Create Plan (POST /api/trainers/plans) [TRAINER ONLY]",
+              "request": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Authorization",
+                    "value": "Bearer {{authToken}}"
+                  },
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  }
+                ],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"name\": \"Premium Training Plan\",\n  \"description\": \"Personalized training with nutrition guidance\",\n  \"price\": 99.99,\n  \"duration\": \"monthly\"\n}"
+                },
+                "url": {
+                  "raw": "{{baseUrl}}/api/trainers/plans",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "api",
+                    "trainers",
+                    "plans"
+                  ]
+                }
+              }
+            },
+            {
+              "name": "Update Plan (PUT /api/trainers/plans/{id}) [TRAINER ONLY]",
+              "request": {
+                "method": "PUT",
+                "header": [
+                  {
+                    "key": "Authorization",
+                    "value": "Bearer {{authToken}}"
+                  },
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  }
+                ],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"name\": \"Updated Plan Name\",\n  \"price\": 109.99\n}"
+                },
+                "url": {
+                  "raw": "{{baseUrl}}/api/trainers/plans/{{planId}}",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "api",
+                    "trainers",
+                    "plans",
+                    "{{planId}}"
+                  ]
+                }
+              }
+            },
+            {
+              "name": "Delete Plan (DELETE /api/trainers/plans/{id}) [TRAINER ONLY]",
+              "request": {
+                "method": "DELETE",
+                "header": [
+                  {
+                    "key": "Authorization",
+                    "value": "Bearer {{authToken}}"
+                  }
+                ],
+                "url": {
+                  "raw": "{{baseUrl}}/api/trainers/plans/{{planId}}",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "api",
+                    "trainers",
+                    "plans",
+                    "{{planId}}"
+                  ]
+                }
+              }
+            },
+            {
+              "name": "Send Message (POST /api/trainers/messages) [TRAINER ONLY]",
+              "request": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Authorization",
+                    "value": "Bearer {{authToken}}"
+                  },
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  }
+                ],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"studentId\": \"{{studentId}}\",\n  \"message\": \"Great progress on your workouts!\"\n}"
+                },
+                "url": {
+                  "raw": "{{baseUrl}}/api/trainers/messages",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "api",
+                    "trainers",
+                    "messages"
+                  ]
+                }
+              }
+            },
+            {
+              "name": "Get Personal Schedule (GET /api/trainers/schedule) [TRAINER ONLY]",
+              "request": {
+                "method": "GET",
+                "header": [
+                  {
+                    "key": "Authorization",
+                    "value": "Bearer {{authToken}}"
+                  }
+                ],
+                "url": {
+                  "raw": "{{baseUrl}}/api/trainers/schedule",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "api",
+                    "trainers",
+                    "schedule"
+                  ]
+                }
+              }
+            },
+            {
+              "name": "Create Personal Schedule (POST /api/trainers/schedule) [TRAINER ONLY]",
+              "request": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Authorization",
+                    "value": "Bearer {{authToken}}"
+                  },
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  }
+                ],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"date\": \"2025-08-01\",\n  \"startTime\": \"09:00\",\n  \"endTime\": \"17:00\",\n  \"available\": true\n}"
+                },
+                "url": {
+                  "raw": "{{baseUrl}}/api/trainers/schedule",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "api",
+                    "trainers",
+                    "schedule"
+                  ]
+                }
+              }
+            }
+          ]
+        },
+        {
+          "name": "subscriptions",
+          "item": [
+            {
+              "name": "Subscribe to Plan (POST /api/subscriptions)",
+              "request": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Authorization",
+                    "value": "Bearer {{authToken}}"
+                  },
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  }
+                ],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"planId\": \"{{planId}}\",\n  \"paymentMethod\": \"credit_card\"\n}"
+                },
+                "url": {
+                  "raw": "{{baseUrl}}/api/subscriptions",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "api",
+                    "subscriptions"
+                  ]
+                }
+              }
+            },
+            {
+              "name": "Cancel Subscription (DELETE /api/subscriptions)",
+              "request": {
+                "method": "DELETE",
+                "header": [
+                  {
+                    "key": "Authorization",
+                    "value": "Bearer {{authToken}}"
+                  }
+                ],
+                "url": {
+                  "raw": "{{baseUrl}}/api/subscriptions",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "api",
+                    "subscriptions"
+                  ]
+                }
+              }
+            }
+          ]
+        },
+        {
+          "name": "schedulings",
+          "item": [
+            {
+              "name": "Get Schedulings (GET /api/schedulings)",
+              "request": {
+                "method": "GET",
+                "header": [
+                  {
+                    "key": "Authorization",
+                    "value": "Bearer {{authToken}}"
+                  }
+                ],
+                "url": {
+                  "raw": "{{baseUrl}}/api/schedulings",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "api",
+                    "schedulings"
+                  ]
+                }
+              }
+            },
+            {
+              "name": "Create Scheduling (POST /api/schedulings)",
+              "request": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Authorization",
+                    "value": "Bearer {{authToken}}"
+                  },
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  }
+                ],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"trainerId\": \"{{trainerId}}\",\n  \"date\": \"2025-08-01\",\n  \"startTime\": \"10:00\",\n  \"endTime\": \"11:00\",\n  \"notes\": \"First training session\"\n}"
+                },
+                "url": {
+                  "raw": "{{baseUrl}}/api/schedulings",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "api",
+                    "schedulings"
+                  ]
+                }
+              }
+            },
+            {
+              "name": "Get Scheduling (GET /api/schedulings/{id})",
+              "request": {
+                "method": "GET",
+                "header": [
+                  {
+                    "key": "Authorization",
+                    "value": "Bearer {{authToken}}"
+                  }
+                ],
+                "url": {
+                  "raw": "{{baseUrl}}/api/schedulings/{{schedulingId}}",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "api",
+                    "schedulings",
+                    "{{schedulingId}}"
+                  ]
+                }
+              }
+            },
+            {
+              "name": "Update Scheduling (PUT /api/schedulings/{id})",
+              "request": {
+                "method": "PUT",
+                "header": [
+                  {
+                    "key": "Authorization",
+                    "value": "Bearer {{authToken}}"
+                  },
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  }
+                ],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"date\": \"2025-08-02\",\n  \"startTime\": \"11:00\",\n  \"notes\": \"Rescheduled session\"\n}"
+                },
+                "url": {
+                  "raw": "{{baseUrl}}/api/schedulings/{{schedulingId}}",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "api",
+                    "schedulings",
+                    "{{schedulingId}}"
+                  ]
+                }
+              }
+            },
+            {
+              "name": "Cancel Scheduling (DELETE /api/schedulings/{id})",
+              "request": {
+                "method": "DELETE",
+                "header": [
+                  {
+                    "key": "Authorization",
+                    "value": "Bearer {{authToken}}"
+                  }
+                ],
+                "url": {
+                  "raw": "{{baseUrl}}/api/schedulings/{{schedulingId}}",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "api",
+                    "schedulings",
+                    "{{schedulingId}}"
+                  ]
+                }
+              }
+            }
+          ]
+        },
+        {
+          "name": "analytics",
+          "item": [
+            {
+              "name": "Get Workout Frequency (GET /api/analytics/workout-frequency)",
+              "request": {
+                "method": "GET",
+                "header": [
+                  {
+                    "key": "Authorization",
+                    "value": "Bearer {{authToken}}"
+                  }
+                ],
+                "url": {
+                  "raw": "{{baseUrl}}/api/analytics/workout-frequency",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "api",
+                    "analytics",
+                    "workout-frequency"
+                  ]
+                }
+              }
+            },
+            {
+              "name": "Get Workout History (GET /api/analytics/workout-history)",
+              "request": {
+                "method": "GET",
+                "header": [
+                  {
+                    "key": "Authorization",
+                    "value": "Bearer {{authToken}}"
+                  }
+                ],
+                "url": {
+                  "raw": "{{baseUrl}}/api/analytics/workout-history",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "api",
+                    "analytics",
+                    "workout-history"
+                  ]
+                }
+              }
+            },
+            {
+              "name": "Get Workout Performance (GET /api/analytics/workout-performance)",
+              "request": {
+                "method": "GET",
+                "header": [
+                  {
+                    "key": "Authorization",
+                    "value": "Bearer {{authToken}}"
+                  }
+                ],
+                "url": {
+                  "raw": "{{baseUrl}}/api/analytics/workout-performance",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "api",
+                    "analytics",
+                    "workout-performance"
+                  ]
+                }
+              }
+            },
+            {
+              "name": "Get User Workout Frequency (GET /api/analytics/users/{userId}/workout-frequency) [TRAINER ONLY]",
+              "request": {
+                "method": "GET",
+                "header": [
+                  {
+                    "key": "Authorization",
+                    "value": "Bearer {{authToken}}"
+                  }
+                ],
+                "url": {
+                  "raw": "{{baseUrl}}/api/analytics/users/{{userId}}/workout-frequency",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "api",
+                    "analytics",
+                    "users",
+                    "{{userId}}",
+                    "workout-frequency"
+                  ]
+                }
+              }
+            },
+            {
+              "name": "Get User Workout History (GET /api/analytics/users/{userId}/workout-history) [TRAINER ONLY]",
+              "request": {
+                "method": "GET",
+                "header": [
+                  {
+                    "key": "Authorization",
+                    "value": "Bearer {{authToken}}"
+                  }
+                ],
+                "url": {
+                  "raw": "{{baseUrl}}/api/analytics/users/{{userId}}/workout-history",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "api",
+                    "analytics",
+                    "users",
+                    "{{userId}}",
+                    "workout-history"
+                  ]
+                }
+              }
+            },
+            {
+              "name": "Get User Workout Performance (GET /api/analytics/users/{userId}/workout-performance) [TRAINER ONLY]",
+              "request": {
+                "method": "GET",
+                "header": [
+                  {
+                    "key": "Authorization",
+                    "value": "Bearer {{authToken}}"
+                  }
+                ],
+                "url": {
+                  "raw": "{{baseUrl}}/api/analytics/users/{{userId}}/workout-performance",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "api",
+                    "analytics",
+                    "users",
+                    "{{userId}}",
+                    "workout-performance"
+                  ]
+                }
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "admin",
+      "item": [
+        {
+          "name": "users",
+          "item": [
+            {
+              "name": "Get All Users (GET /admin/users) [ADMIN ONLY]",
+              "request": {
+                "method": "GET",
+                "header": [
+                  {
+                    "key": "Authorization",
+                    "value": "Bearer {{authToken}}"
+                  }
+                ],
+                "url": {
+                  "raw": "{{baseUrl}}/admin/users",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "admin",
+                    "users"
+                  ]
+                }
+              }
+            },
+            {
+              "name": "Update User Status (POST /admin/users/status) [ADMIN ONLY]",
+              "request": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Authorization",
+                    "value": "Bearer {{authToken}}"
+                  },
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  }
+                ],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"userId\": \"{{userId}}\",\n  \"status\": \"active\"\n}"
+                },
+                "url": {
+                  "raw": "{{baseUrl}}/admin/users/status",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "admin",
+                    "users",
+                    "status"
+                  ]
+                }
+              }
+            },
+            {
+              "name": "Delete User (DELETE /admin/users) [ADMIN ONLY]",
+              "request": {
+                "method": "DELETE",
+                "header": [
+                  {
+                    "key": "Authorization",
+                    "value": "Bearer {{authToken}}"
+                  },
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  }
+                ],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"userId\": \"{{userId}}\"\n}"
+                },
+                "url": {
+                  "raw": "{{baseUrl}}/admin/users",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "admin",
+                    "users"
+                  ]
+                }
+              }
+            },
+            {
+              "name": "Get User Statistics (GET /admin/users/statistics) [ADMIN ONLY]",
+              "request": {
+                "method": "GET",
+                "header": [
+                  {
+                    "key": "Authorization",
+                    "value": "Bearer {{authToken}}"
+                  }
+                ],
+                "url": {
+                  "raw": "{{baseUrl}}/admin/users/statistics",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "admin",
+                    "users",
+                    "statistics"
+                  ]
+                }
+              }
+            }
+          ]
+        },
+        {
+          "name": "Get Statistics (GET /admin/statistics) [ADMIN ONLY]",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{authToken}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/admin/statistics",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "admin",
+                "statistics"
+              ]
+            }
+          }
+        },
+        {
+          "name": "Get Reports (GET /admin/reports) [ADMIN ONLY]",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{authToken}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/admin/reports",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "admin",
+                "reports"
+              ]
+            }
+          }
+        },
+        {
+          "name": "Get System Health (GET /admin/system/health) [ADMIN ONLY]",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{authToken}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/admin/system/health",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "admin",
+                "system",
+                "health"
+              ]
+            }
+          }
+        },
+        {
+          "name": "templates",
+          "item": [
+            {
+              "name": "exercises",
+              "item": [
+                {
+                  "name": "Get Exercise Templates (GET /admin/templates/exercises) [ADMIN ONLY]",
+                  "request": {
+                    "method": "GET",
+                    "header": [
+                      {
+                        "key": "Authorization",
+                        "value": "Bearer {{authToken}}"
+                      }
+                    ],
+                    "url": {
+                      "raw": "{{baseUrl}}/admin/templates/exercises",
+                      "host": [
+                        "{{baseUrl}}"
+                      ],
+                      "path": [
+                        "admin",
+                        "templates",
+                        "exercises"
+                      ]
+                    }
+                  }
+                },
+                {
+                  "name": "Create Exercise Template (POST /admin/templates/exercises) [ADMIN ONLY]",
+                  "request": {
+                    "method": "POST",
+                    "header": [
+                      {
+                        "key": "Authorization",
+                        "value": "Bearer {{authToken}}"
+                      },
+                      {
+                        "key": "Content-Type",
+                        "value": "application/json"
+                      }
+                    ],
+                    "body": {
+                      "mode": "raw",
+                      "raw": "{\n  \"name\": \"Admin Exercise Template\",\n  \"description\": \"Template created by admin\",\n  \"category\": \"strength\",\n  \"muscleGroup\": \"chest\"\n}"
+                    },
+                    "url": {
+                      "raw": "{{baseUrl}}/admin/templates/exercises",
+                      "host": [
+                        "{{baseUrl}}"
+                      ],
+                      "path": [
+                        "admin",
+                        "templates",
+                        "exercises"
+                      ]
+                    }
+                  }
+                },
+                {
+                  "name": "Delete Exercise Template (DELETE /admin/templates/exercises/{id}) [ADMIN ONLY]",
+                  "request": {
+                    "method": "DELETE",
+                    "header": [
+                      {
+                        "key": "Authorization",
+                        "value": "Bearer {{authToken}}"
+                      }
+                    ],
+                    "url": {
+                      "raw": "{{baseUrl}}/admin/templates/exercises/{{exerciseId}}",
+                      "host": [
+                        "{{baseUrl}}"
+                      ],
+                      "path": [
+                        "admin",
+                        "templates",
+                        "exercises",
+                        "{{exerciseId}}"
+                      ]
+                    }
+                  }
+                }
+              ]
+            },
+            {
+              "name": "workouts",
+              "item": [
+                {
+                  "name": "Get Workout Templates (GET /admin/templates/workouts) [ADMIN ONLY]",
+                  "request": {
+                    "method": "GET",
+                    "header": [
+                      {
+                        "key": "Authorization",
+                        "value": "Bearer {{authToken}}"
+                      }
+                    ],
+                    "url": {
+                      "raw": "{{baseUrl}}/admin/templates/workouts",
+                      "host": [
+                        "{{baseUrl}}"
+                      ],
+                      "path": [
+                        "admin",
+                        "templates",
+                        "workouts"
+                      ]
+                    }
+                  }
+                },
+                {
+                  "name": "Create Workout Template (POST /admin/templates/workouts) [ADMIN ONLY]",
+                  "request": {
+                    "method": "POST",
+                    "header": [
+                      {
+                        "key": "Authorization",
+                        "value": "Bearer {{authToken}}"
+                      },
+                      {
+                        "key": "Content-Type",
+                        "value": "application/json"
+                      }
+                    ],
+                    "body": {
+                      "mode": "raw",
+                      "raw": "{\n  \"name\": \"Admin Workout Template\",\n  \"description\": \"Template workout created by admin\",\n  \"level\": \"INTERMEDIARY\",\n  \"modality\": \"Strength Training\"\n}"
+                    },
+                    "url": {
+                      "raw": "{{baseUrl}}/admin/templates/workouts",
+                      "host": [
+                        "{{baseUrl}}"
+                      ],
+                      "path": [
+                        "admin",
+                        "templates",
+                        "workouts"
+                      ]
+                    }
+                  }
+                },
+                {
+                  "name": "Delete Workout Template (DELETE /admin/templates/workouts/{id}) [ADMIN ONLY]",
+                  "request": {
+                    "method": "DELETE",
+                    "header": [
+                      {
+                        "key": "Authorization",
+                        "value": "Bearer {{authToken}}"
+                      }
+                    ],
+                    "url": {
+                      "raw": "{{baseUrl}}/admin/templates/workouts/{{workoutId}}",
+                      "host": [
+                        "{{baseUrl}}"
+                      ],
+                      "path": [
+                        "admin",
+                        "templates",
+                        "workouts",
+                        "{{workoutId}}"
+                      ]
+                    }
+                  }
+                }
+              ]
             }
           ]
         }

@@ -11,6 +11,7 @@ import (
 type API struct {
 	Router            *chi.Mux
 	Logger            *slog.Logger
+	SessionManager    *scs.SessionManager
 	UserService       *services.UserService
 	WorkoutService    *services.WorkoutService
 	SchedulingService *services.SchedulingService
@@ -18,5 +19,5 @@ type API struct {
 	AnalyticsService  *services.AnalyticsService
 	PlanService       *services.PlanService
 	SystemService     services.SystemService
-	SessionManager    *scs.SessionManager
+	FileService       *services.FileService
 }

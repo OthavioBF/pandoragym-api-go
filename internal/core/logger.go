@@ -30,7 +30,6 @@ const (
 	LogFormatCustom LogFormat = "custom"
 )
 
-// LoggerConfig holds the logger configuration
 type LoggerConfig struct {
 	Level      LogLevel
 	Format     LogFormat
@@ -40,7 +39,6 @@ type LoggerConfig struct {
 	AppVersion string
 }
 
-// CustomHandler implements a custom two-line log format
 type CustomHandler struct {
 	opts   *slog.HandlerOptions
 	output io.Writer
@@ -48,7 +46,6 @@ type CustomHandler struct {
 	groups []string
 }
 
-// NewCustomHandler creates a new custom handler
 func NewCustomHandler(output io.Writer, opts *slog.HandlerOptions) *CustomHandler {
 	if opts == nil {
 		opts = &slog.HandlerOptions{}
@@ -70,23 +67,18 @@ func (h *CustomHandler) Enabled(ctx context.Context, level slog.Level) bool {
 	return level >= minLevel
 }
 
-// Handle formats and writes the log record
 func (h *CustomHandler) Handle(ctx context.Context, r slog.Record) error {
-	// First line: date hour loglevel:
 	timestamp := r.Time.Format("02/01/2006 15:04:05")
 	level := strings.ToUpper(r.Level.String())
 
 	firstLine := fmt.Sprintf("%s %s:", timestamp, level)
 
-	// Second line: source and message
 	var secondLine string
 
-	// Get source information if enabled
 	if h.opts.AddSource && r.PC != 0 {
 		fs := runtime.CallersFrames([]uintptr{r.PC})
 		f, _ := fs.Next()
 
-		// Get just the filename, not the full path
 		filename := filepath.Base(f.File)
 		source := fmt.Sprintf("%s:%d", filename, f.Line)
 
@@ -95,7 +87,6 @@ func (h *CustomHandler) Handle(ctx context.Context, r slog.Record) error {
 		secondLine = fmt.Sprintf("    %s", r.Message)
 	}
 
-	// Add attributes to the second line
 	var attrs []string
 	r.Attrs(func(a slog.Attr) bool {
 		attrs = append(attrs, fmt.Sprintf("%s=%v", a.Key, a.Value))
@@ -131,7 +122,6 @@ func (h *CustomHandler) WithAttrs(attrs []slog.Attr) slog.Handler {
 	}
 }
 
-// WithGroup returns a new handler with the given group
 func (h *CustomHandler) WithGroup(name string) slog.Handler {
 	newGroups := make([]string, len(h.groups)+1)
 	copy(newGroups, h.groups)
@@ -145,7 +135,6 @@ func (h *CustomHandler) WithGroup(name string) slog.Handler {
 	}
 }
 
-// NewLoggerConfig creates a new logger configuration with defaults
 func NewLoggerConfig() *LoggerConfig {
 	return &LoggerConfig{
 		Level:      getLogLevelFromEnv(),
@@ -157,41 +146,24 @@ func NewLoggerConfig() *LoggerConfig {
 	}
 }
 
-// NewLogger creates a new structured logger with the given configuration
 func NewLogger(config *LoggerConfig) *slog.Logger {
 	var handler slog.Handler
 
-	// Configure handler options
 	opts := &slog.HandlerOptions{
 		Level:     getSlogLevel(config.Level),
 		AddSource: config.AddSource,
 	}
 
-	// Create handler based on format
 	switch config.Format {
 	case LogFormatJSON:
 		handler = slog.NewJSONHandler(config.Output, opts)
 	case LogFormatCustom:
 		handler = NewCustomHandler(config.Output, opts)
 	default:
-		// Default to custom format for better readability
 		handler = NewCustomHandler(config.Output, opts)
 	}
 
-	// Create logger with base attributes
-	logger := slog.New(handler)
-
-	// Add application context
-	if config.AppName != "" || config.AppVersion != "" {
-		logger = logger.With(
-			slog.Group("app",
-				slog.String("name", config.AppName),
-				slog.String("version", config.AppVersion),
-			),
-		)
-	}
-
-	return logger
+	return slog.New(handler)
 }
 
 // NewDefaultLogger creates a logger with default configuration
