@@ -108,7 +108,7 @@ func (api *API) DeletePlan(w http.ResponseWriter, r *http.Request) {
 	})
 }
 
-func (api *API) SubscribeToPlan(w http.ResponseWriter, r *http.Request) {
+func (api *API) SubscribeToTrainerPlan(w http.ResponseWriter, r *http.Request) {
 	userID, ok := r.Context().Value(utils.UserIDKey).(uuid.UUID)
 	if !ok {
 		utils.WriteErrorResponse(w, http.StatusUnauthorized, "Unauthorized")
@@ -132,7 +132,7 @@ func (api *API) SubscribeToPlan(w http.ResponseWriter, r *http.Request) {
 	})
 }
 
-func (api *API) CancelPlan(w http.ResponseWriter, r *http.Request) {
+func (api *API) CancelTrainerPlan(w http.ResponseWriter, r *http.Request) {
 	userID, ok := r.Context().Value(utils.UserIDKey).(uuid.UUID)
 	if !ok {
 		utils.WriteErrorResponse(w, http.StatusUnauthorized, "Unauthorized")

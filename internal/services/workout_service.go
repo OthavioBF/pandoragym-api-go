@@ -22,19 +22,8 @@ func NewWorkoutService(queries *pgstore.Queries, pool *pgxpool.Pool) *WorkoutSer
 	}
 }
 
-// GetWorkouts retrieves workouts based on user role
 func (s *WorkoutService) GetWorkouts(ctx context.Context, userID uuid.UUID) ([]pgstore.GetWorkoutsRow, error) {
-	role, err := s.queries.GetUserRole(ctx, userID)
-	if err != nil {
-		return nil, fmt.Errorf("failed to get user role: %w", err)
-	}
-
-	var personalID *uuid.UUID
-	if role == pgstore.RolePersonal {
-		personalID = &userID
-	}
-
-	workouts, err := s.queries.GetWorkouts(ctx, personalID)
+	workouts, err := s.queries.GetWorkouts(ctx, userID)
 	if err != nil {
 		return nil, fmt.Errorf("failed to get workouts: %w", err)
 	}
@@ -42,32 +31,18 @@ func (s *WorkoutService) GetWorkouts(ctx context.Context, userID uuid.UUID) ([]p
 	return workouts, nil
 }
 
-// GetWorkoutByID retrieves a specific workout with access control
-func (s *WorkoutService) GetWorkoutByID(ctx context.Context, workoutID, userID uuid.UUID) (*pgstore.GetWorkoutByIdRow, error) {
-	role, err := s.queries.GetUserRole(ctx, userID)
+func (s *WorkoutService) GetWorkoutByID(ctx context.Context, workoutID uuid.UUID) (*pgstore.GetWorkoutByIdRow, []pgstore.ExercisesSetup, error) {
+	workout, err := s.queries.GetWorkoutById(ctx, workoutID)
 	if err != nil {
-		return nil, fmt.Errorf("failed to get user role: %w", err)
+		return nil, nil, fmt.Errorf("failed to get workout: %w", err)
 	}
 
-	var personalID *uuid.UUID
-	if role == pgstore.RolePersonal {
-		personalID = &userID
-	}
-
-	workout, err := s.queries.GetWorkoutById(ctx, pgstore.GetWorkoutByIdParams{
-		ID:         workoutID,
-		PersonalID: personalID,
-	})
+	exercises, err := s.queries.GetExercisesByWorkoutId(ctx, workoutID)
 	if err != nil {
-		return nil, fmt.Errorf("failed to get workout: %w", err)
+		return nil, nil, fmt.Errorf("failed to get exercises for workout: %w", err)
 	}
 
-	// Access control: personal trainers can only access their own workouts
-	if role == pgstore.RolePersonal && workout.PersonalID != nil && *workout.PersonalID != userID {
-		return nil, fmt.Errorf("access denied: workout belongs to another trainer")
-	}
-
-	return workout, nil
+	return workout, exercises, nil
 }
 
 // CreateWorkout creates a new workout with exercises in a transaction

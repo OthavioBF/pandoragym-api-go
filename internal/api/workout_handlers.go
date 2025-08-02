@@ -9,8 +9,6 @@ import (
 	"github.com/othavioBF/pandoragym-go-api/internal/utils"
 )
 
-// Workout CRUD operations
-
 func (api *API) GetWorkouts(w http.ResponseWriter, r *http.Request) {
 	userID, ok := r.Context().Value(utils.UserIDKey).(uuid.UUID)
 	if !ok {
@@ -37,26 +35,28 @@ func (api *API) GetWorkout(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	workoutIDStr := chi.URLParam(r, "id")
-	workoutID, err := uuid.Parse(workoutIDStr)
+	workoutID, err := uuid.Parse(chi.URLParam(r, "id"))
 	if err != nil {
 		utils.WriteErrorResponse(w, http.StatusBadRequest, "Invalid workout ID")
 		return
 	}
 
-	workout, err := api.WorkoutService.GetWorkoutByID(r.Context(), workoutID, userID)
+	workout, exercises, err := api.WorkoutService.GetWorkoutByID(r.Context(), workoutID)
 	if err != nil {
 		api.Logger.Error("Failed to get workout", "error", err, "workout_id", workoutID, "user_id", userID)
 		utils.WriteErrorResponse(w, http.StatusInternalServerError, "Failed to get workout")
 		return
 	}
 
-	if workout == nil {
+	if workout == nil || exercises == nil {
 		utils.WriteErrorResponse(w, http.StatusNotFound, "Workout not found")
 		return
 	}
 
-	utils.WriteJSONResponse(w, http.StatusOK, workout)
+	utils.WriteJSONResponse(w, http.StatusOK, map[string]any{
+		"workout":   workout,
+		"exercises": exercises,
+	})
 }
 
 func (api *API) CreateWorkout(w http.ResponseWriter, r *http.Request) {

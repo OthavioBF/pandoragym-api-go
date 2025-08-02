@@ -4,6 +4,7 @@ import (
 	"context"
 	"time"
 
+	"github.com/georgysavva/scany/v2/pgxscan"
 	"github.com/google/uuid"
 	"github.com/jackc/pgx/v5"
 )
@@ -314,35 +315,13 @@ WHERE workout_id = $1
 ORDER BY created_at ASC`
 
 func (q *Queries) GetExercisesByWorkoutId(ctx context.Context, workoutID uuid.UUID) ([]ExercisesSetup, error) {
-	rows, err := q.db.Query(ctx, getExercisesByWorkoutId, workoutID)
+	var items []ExercisesSetup
+
+	err := pgxscan.Select(ctx, q.db, &items, getExercisesByWorkoutId, workoutID)
 	if err != nil {
 		return nil, err
 	}
-	defer rows.Close()
 
-	var items []ExercisesSetup
-	for rows.Next() {
-		var i ExercisesSetup
-		if err := rows.Scan(
-			&i.ID,
-			&i.Name,
-			&i.Thumbnail,
-			&i.VideoURL,
-			&i.Sets,
-			&i.Reps,
-			&i.RestTimeBetweenSets,
-			&i.Load,
-			&i.WorkoutID,
-			&i.CreatedAt,
-			&i.UpdatedAt,
-		); err != nil {
-			return nil, err
-		}
-		items = append(items, i)
-	}
-	if err := rows.Err(); err != nil {
-		return nil, err
-	}
 	return items, nil
 }
 

@@ -4,6 +4,7 @@ import (
 	"context"
 	"time"
 
+	"github.com/georgysavva/scany/v2/pgxscan"
 	"github.com/google/uuid"
 	"github.com/jackc/pgx/v5"
 	"github.com/lib/pq"
@@ -18,7 +19,7 @@ type CreateWorkoutParams struct {
 	VideoURL                 *string    `json:"videoUrl,omitempty" db:"video_url"`
 	RestTimeBetweenExercises *int32     `json:"restTimeBetweenExercises,omitempty" db:"rest_time_between_exercises"`
 	Level                    *Level     `json:"level,omitempty" db:"level"`
-	WeekDays                 []Day      `json:"weekDays" db:"week_days" validate:"required"`
+	WeekDays                 DayArray   `json:"weekDays" db:"week_days" validate:"required"`
 	Exclusive                bool       `json:"exclusive" db:"exclusive"`
 	IsTemplate               bool       `json:"isTemplate" db:"is_template"`
 	Modality                 string     `json:"modality" db:"modality" validate:"required"`
@@ -37,7 +38,7 @@ type UpdateWorkoutParams struct {
 	VideoURL                 *string    `json:"videoUrl,omitempty" db:"video_url"`
 	RestTimeBetweenExercises *int32     `json:"restTimeBetweenExercises,omitempty" db:"rest_time_between_exercises"`
 	Level                    *Level     `json:"level,omitempty" db:"level"`
-	WeekDays                 []Day      `json:"weekDays,omitempty" db:"week_days"`
+	WeekDays                 DayArray   `json:"weekDays,omitempty" db:"week_days"`
 	Modality                 *string    `json:"modality,omitempty" db:"modality"`
 	PersonalID               *uuid.UUID `json:"personalId,omitempty" db:"personal_id"`
 	UpdatedAt                time.Time  `json:"updatedAt" db:"updated_at"`
@@ -61,7 +62,7 @@ type GetWorkoutsRow struct {
 	VideoURL                 *string    `json:"videoUrl,omitempty" db:"video_url"`
 	RestTimeBetweenExercises *int32     `json:"restTimeBetweenExercises,omitempty" db:"rest_time_between_exercises"`
 	Level                    *Level     `json:"level,omitempty" db:"level"`
-	WeekDays                 []Day      `json:"weekDays" db:"week_days"`
+	WeekDays                 DayArray   `json:"weekDays" db:"week_days"`
 	Exclusive                bool       `json:"exclusive" db:"exclusive"`
 	IsTemplate               bool       `json:"isTemplate" db:"is_template"`
 	Modality                 string     `json:"modality" db:"modality"`
@@ -80,7 +81,7 @@ type GetWorkoutByIdRow struct {
 	VideoURL                 *string    `json:"videoUrl,omitempty" db:"video_url"`
 	RestTimeBetweenExercises *int32     `json:"restTimeBetweenExercises,omitempty" db:"rest_time_between_exercises"`
 	Level                    *Level     `json:"level,omitempty" db:"level"`
-	WeekDays                 []Day      `json:"weekDays" db:"week_days"`
+	WeekDays                 DayArray   `json:"weekDays" db:"week_days"`
 	Exclusive                bool       `json:"exclusive" db:"exclusive"`
 	IsTemplate               bool       `json:"isTemplate" db:"is_template"`
 	Modality                 string     `json:"modality" db:"modality"`
@@ -99,7 +100,7 @@ type WorkoutResponse struct {
 	VideoURL                 *string    `json:"videoUrl,omitempty"`
 	RestTimeBetweenExercises *int32     `json:"restTimeBetweenExercises,omitempty"`
 	Level                    *Level     `json:"level,omitempty"`
-	WeekDays                 []Day      `json:"weekDays"`
+	WeekDays                 DayArray   `json:"weekDays"`
 	Exclusive                bool       `json:"exclusive"`
 	IsTemplate               bool       `json:"isTemplate"`
 	Modality                 string     `json:"modality"`
@@ -172,48 +173,26 @@ func (q *Queries) CreateWorkout(ctx context.Context, arg CreateWorkoutParams) (u
 	return i.ID, nil
 }
 
-const getWorkouts = `-- name: GetWorkouts :many
-SELECT id, name, description, thumbnail, video_url, rest_time_between_exercises, level, week_days, exclusive, is_template, modality, personal_id, student_id, plan_id, created_at, updated_at 
+const getWorkouts = `
+SELECT 
+    id, name, description, thumbnail, video_url, rest_time_between_exercises, 
+    level, week_days, exclusive, is_template, modality, personal_id, student_id, 
+    plan_id, created_at, updated_at 
 FROM workout 
 WHERE deleted_at IS NULL
-ORDER BY created_at DESC`
+AND (personal_id = $1 OR student_id = $1)
+ORDER BY created_at DESC
+`
 
-func (q *Queries) GetWorkouts(ctx context.Context, personalID *uuid.UUID) ([]GetWorkoutsRow, error) {
-	rows, err := q.db.Query(ctx, getWorkouts)
+func (q *Queries) GetWorkouts(ctx context.Context, userID uuid.UUID) ([]GetWorkoutsRow, error) {
+	var workouts []GetWorkoutsRow
+
+	err := pgxscan.Select(ctx, q.db, &workouts, getWorkouts, userID)
 	if err != nil {
 		return nil, err
 	}
-	defer rows.Close()
 
-	var items []GetWorkoutsRow
-	for rows.Next() {
-		var i GetWorkoutsRow
-		if err := rows.Scan(
-			&i.ID,
-			&i.Name,
-			&i.Description,
-			&i.Thumbnail,
-			&i.VideoURL,
-			&i.RestTimeBetweenExercises,
-			&i.Level,
-			pq.Array(&i.WeekDays),
-			&i.Exclusive,
-			&i.IsTemplate,
-			&i.Modality,
-			&i.PersonalID,
-			&i.StudentID,
-			&i.PlanID,
-			&i.CreatedAt,
-			&i.UpdatedAt,
-		); err != nil {
-			return nil, err
-		}
-		items = append(items, i)
-	}
-	if err := rows.Err(); err != nil {
-		return nil, err
-	}
-	return items, nil
+	return workouts, nil
 }
 
 const getWorkoutById = `-- name: GetWorkoutById :one
@@ -221,35 +200,15 @@ SELECT id, name, description, thumbnail, video_url, rest_time_between_exercises,
 FROM workout 
 WHERE id = $1 AND deleted_at IS NULL`
 
-func (q *Queries) GetWorkoutById(ctx context.Context, arg GetWorkoutByIdParams) (*GetWorkoutByIdRow, error) {
-	row := q.db.QueryRow(ctx, getWorkoutById, arg.ID)
+func (q *Queries) GetWorkoutById(ctx context.Context, workoutID uuid.UUID) (*GetWorkoutByIdRow, error) {
+	var workout *GetWorkoutByIdRow
 
-	var i GetWorkoutByIdRow
-	err := row.Scan(
-		&i.ID,
-		&i.Name,
-		&i.Description,
-		&i.Thumbnail,
-		&i.VideoURL,
-		&i.RestTimeBetweenExercises,
-		&i.Level,
-		pq.Array(&i.WeekDays),
-		&i.Exclusive,
-		&i.IsTemplate,
-		&i.Modality,
-		&i.PersonalID,
-		&i.StudentID,
-		&i.PlanID,
-		&i.CreatedAt,
-		&i.UpdatedAt,
-	)
+	err := pgxscan.Get(ctx, q.db, &workout, getWorkouts, workoutID)
 	if err != nil {
-		if err == pgx.ErrNoRows {
-			return nil, nil
-		}
 		return nil, err
 	}
-	return &i, nil
+
+	return workout, nil
 }
 
 const updateWorkout = `-- name: UpdateWorkout :one

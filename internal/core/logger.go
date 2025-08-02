@@ -166,7 +166,6 @@ func NewLogger(config *LoggerConfig) *slog.Logger {
 	return slog.New(handler)
 }
 
-// NewDefaultLogger creates a logger with default configuration
 func NewDefaultLogger() *slog.Logger {
 	config := NewLoggerConfig()
 	return NewLogger(config)

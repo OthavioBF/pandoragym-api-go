@@ -29,6 +29,17 @@ func (api *API) AuthenticateWithPassword(w http.ResponseWriter, r *http.Request)
 	})
 }
 
+func (api *API) GetSessionData(w http.ResponseWriter, r *http.Request) {
+	sessionData, err := api.AuthService.GetSessionData(r.Context())
+	if err != nil {
+		utils.WriteErrorResponse(w, http.StatusUnauthorized, err.Error())
+	}
+
+	utils.WriteJSONResponse(w, http.StatusOK, map[string]any{
+		"sessionData": sessionData,
+	})
+}
+
 func (api *API) CreateStudentAccount(w http.ResponseWriter, r *http.Request) {
 	req, err := utils.DecodeValidJSON[pgstore.CreateStudentWithUserRequest](r)
 	if err != nil {
@@ -46,7 +57,7 @@ func (api *API) CreateStudentAccount(w http.ResponseWriter, r *http.Request) {
 	utils.WriteJSONResponse(w, http.StatusCreated, user)
 }
 
-func (api *API) CreatePersonalAccount(w http.ResponseWriter, r *http.Request) {
+func (api *API) CreateTrainerAccount(w http.ResponseWriter, r *http.Request) {
 	req, err := utils.DecodeValidJSON[pgstore.CreatePersonalWithUserRequest](r)
 	if err != nil {
 		utils.WriteErrorResponse(w, http.StatusBadRequest, err.Error())
@@ -212,9 +223,7 @@ func (api *API) UploadAvatar(w http.ResponseWriter, r *http.Request) {
 	})
 }
 
-// Personal trainer discovery and interaction
-
-func (api *API) GetPersonalTrainersList(w http.ResponseWriter, r *http.Request) {
+func (api *API) GetTrainersList(w http.ResponseWriter, r *http.Request) {
 	trainers, err := api.UserService.GetPersonalTrainers(r.Context())
 	if err != nil {
 		api.Logger.Error("Failed to get personal trainers", "error", err)
@@ -227,7 +236,7 @@ func (api *API) GetPersonalTrainersList(w http.ResponseWriter, r *http.Request) 
 	})
 }
 
-func (api *API) GetPersonalTrainerByID(w http.ResponseWriter, r *http.Request) {
+func (api *API) GetTrainerByID(w http.ResponseWriter, r *http.Request) {
 	trainerIDStr := chi.URLParam(r, "id")
 	trainerID, err := uuid.Parse(trainerIDStr)
 	if err != nil {
@@ -302,7 +311,7 @@ func (api *API) GetPersonalTrainerComments(w http.ResponseWriter, r *http.Reques
 
 // Personal trainer profile management (requires trainer role)
 
-func (api *API) GetPersonalProfile(w http.ResponseWriter, r *http.Request) {
+func (api *API) GetTrainerProfile(w http.ResponseWriter, r *http.Request) {
 	trainerID, ok := r.Context().Value(utils.UserIDKey).(uuid.UUID)
 	if !ok {
 		utils.WriteErrorResponse(w, http.StatusUnauthorized, "Unauthorized")
@@ -321,7 +330,7 @@ func (api *API) GetPersonalProfile(w http.ResponseWriter, r *http.Request) {
 	})
 }
 
-func (api *API) UpdatePersonalProfile(w http.ResponseWriter, r *http.Request) {
+func (api *API) UpdateTrainerProfile(w http.ResponseWriter, r *http.Request) {
 	trainerID, ok := r.Context().Value(utils.UserIDKey).(uuid.UUID)
 	if !ok {
 		utils.WriteErrorResponse(w, http.StatusUnauthorized, "Unauthorized")
@@ -352,7 +361,7 @@ func (api *API) UpdatePersonalProfile(w http.ResponseWriter, r *http.Request) {
 
 // Student management (requires trainer role)
 
-func (api *API) GetPersonalStudents(w http.ResponseWriter, r *http.Request) {
+func (api *API) GetTrainerStudents(w http.ResponseWriter, r *http.Request) {
 	trainerID, ok := r.Context().Value(utils.UserIDKey).(uuid.UUID)
 	if !ok {
 		utils.WriteErrorResponse(w, http.StatusUnauthorized, "Unauthorized")
@@ -467,13 +476,13 @@ func (api *API) SendMessage(w http.ResponseWriter, r *http.Request) {
 	})
 }
 
-func (api *API) GetPersonalSchedule(w http.ResponseWriter, r *http.Request) {
+func (api *API) GetTrainerSchedule(w http.ResponseWriter, r *http.Request) {
 	utils.WriteJSONResponse(w, http.StatusOK, map[string]string{
 		"message": "Personal trainer schedule not implemented yet",
 	})
 }
 
-func (api *API) CreatePersonalSchedule(w http.ResponseWriter, r *http.Request) {
+func (api *API) CreateTrainerSchedule(w http.ResponseWriter, r *http.Request) {
 	utils.WriteJSONResponse(w, http.StatusOK, map[string]string{
 		"message": "Personal trainer schedule creation not implemented yet",
 	})

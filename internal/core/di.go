@@ -1,7 +1,7 @@
 package core
 
 import (
-	"os"
+	"net/http"
 	"time"
 
 	"github.com/alexedwards/scs/pgxstore"
@@ -21,8 +21,8 @@ func InjectDependencies(queries *pgstore.Queries, pool *pgxpool.Pool) api.API {
 	sessionManager.Lifetime = 24 * time.Hour
 	sessionManager.Cookie.Name = "pandoragym_session"
 	sessionManager.Cookie.HttpOnly = true
-	sessionManager.Cookie.SameSite = 3
-	sessionManager.Cookie.Secure = os.Getenv("ENV") == "production"
+	sessionManager.Cookie.SameSite = http.SameSiteLaxMode
+	// sessionManager.Cookie.Secure = os.Getenv("ENV") == "production"
 
 	userService := services.NewUserService(queries, sessionManager)
 	workoutService := services.NewWorkoutService(queries, pool)

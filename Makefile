@@ -52,7 +52,7 @@ docker-setup:
 	@echo "🚀 Setting up complete Docker environment..."
 	@make docker-run
 	@echo "⏳ Waiting for database to be ready..."
-	@sleep 15
+	@sleep 5
 	@make docker-migrate
 	@make docker-seed
 	@echo "🎉 Complete Docker environment ready!"
@@ -67,8 +67,6 @@ docker-run:
 		echo "🔄 Retrying to start containers..."; \
 		docker-compose up -d; \
 	fi
-	@echo "⏳ Waiting for services to be ready..."
-	@sleep 5
 	@echo "🔍 Checking if API is running..."
 	@for i in $$(seq 1 5); do \
 		if curl -s -f http://localhost:3333/health > /dev/null 2>&1; then \
@@ -84,6 +82,16 @@ docker-run:
 	echo "🛑 Stopping containers due to API failure..."; \
 	docker-compose down; \
 	exit 1
+
+docker-rebuild:
+	@echo "🔨 Force rebuilding Docker image..."
+	@echo "🛑 Stopping containers..."
+	docker-compose down
+	@echo "🗑️  Removing old images..."
+	docker-compose build --no-cache
+	@echo "🚀 Starting with fresh image..."
+	docker-compose up -d
+	@echo "✅ Docker rebuild complete!"
 
 docker-stop:
 	@echo "🛑 Stopping Docker containers..."

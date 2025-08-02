@@ -41,10 +41,10 @@ type CreatePersonalParams struct {
 }
 
 type UpdateUserParams struct {
-	ID        uuid.UUID  `json:"id" db:"id" validate:"required"`
-	Name      *string    `json:"name,omitempty" db:"name" validate:"omitempty,min=2,max=100"`
-	Phone     *string    `json:"phone,omitempty" db:"phone" validate:"omitempty,min=10"`
-	UpdatedAt time.Time  `json:"updatedAt" db:"updated_at"`
+	ID        uuid.UUID `json:"id" db:"id" validate:"required"`
+	Name      *string   `json:"name,omitempty" db:"name" validate:"omitempty,min=2,max=100"`
+	Phone     *string   `json:"phone,omitempty" db:"phone" validate:"omitempty,min=10"`
+	UpdatedAt time.Time `json:"updatedAt" db:"updated_at"`
 }
 
 type UpdateUserAvatarParams struct {

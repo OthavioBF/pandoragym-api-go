@@ -20,7 +20,7 @@ func (api *API) BindRoutes() {
 
 		r.Get("/health", func(w http.ResponseWriter, r *http.Request) {
 			utils.WriteJSONResponse(w, http.StatusOK, map[string]any{
-				"status":    "healthy",
+				"status":    "healthyyy",
 				"timestamp": time.Now().UTC(),
 				"service":   "pandoragym-api",
 				"version":   "1.0.0",
@@ -31,11 +31,12 @@ func (api *API) BindRoutes() {
 
 		r.Post("/session", api.AuthenticateWithPassword)
 		r.Post("/register/student", api.CreateStudentAccount)
-		r.Post("/register/personal", api.CreatePersonalAccount)
+		r.Post("/register/personal", api.CreateTrainerAccount)
 		r.Post("/password/recover", api.PasswordRecover)
 		r.Post("/password/reset", api.ResetPassword)
 		r.Post("/refresh", api.RefreshSession)
 		r.Post("/revoke", api.RevokeToken)
+		r.Post("/session/data", api.GetSessionData)
 
 		r.Group(func(r chi.Router) {
 			r.Use(api.AuthMiddleware)
@@ -79,36 +80,45 @@ func (api *API) BindRoutes() {
 			})
 
 			r.Route("/trainers", func(r chi.Router) {
-				r.Get("/", api.GetPersonalTrainersList)
-				r.Get("/{id}", api.GetPersonalTrainerByID)
+				r.Get("/", api.GetTrainersList)
+				r.Get("/{id}", api.GetTrainerByID)
 				r.Post("/{id}/comments", api.AddPersonalTrainerComment)
 				r.Get("/{id}/comments", api.GetPersonalTrainerComments)
 
+				r.Get("/plans", api.GetTrainerPlans)
+				r.Group(func(r chi.Router) {
+					r.Use(api.RequireStudent)
+
+					r.Post("/", api.SubscribeToTrainerPlan)
+					r.Delete("/", api.CancelTrainerPlan)
+				})
+
 				r.Group(func(r chi.Router) {
 					r.Use(api.RequirePersonal)
-					r.Get("/profile", api.GetPersonalProfile)
-					r.Put("/profile", api.UpdatePersonalProfile)
 
-					r.Get("/students", api.GetPersonalStudents)
+					r.Get("/profile", api.GetTrainerProfile)
+					r.Put("/profile", api.UpdateTrainerProfile)
+
+					r.Get("/students", api.GetTrainerStudents)
 					r.Post("/students", api.CreateStudent)
 					r.Get("/students/{id}", api.GetStudentByID)
 					r.Get("/students/{id}/workouts", api.GetStudentWorkouts)
 					r.Get("/students/{id}/evolution", api.GetStudentEvolution)
 					r.Delete("/students/{id}", api.RemoveStudent)
 
-					r.Get("/plans", api.GetTrainerPlans)
 					r.Post("/plans", api.CreatePlan)
 					r.Put("/plans/{id}", api.UpdatePlan)
 					r.Delete("/plans/{id}", api.DeletePlan)
 
 					r.Post("/messages", api.SendMessage)
-					r.Get("/schedule", api.GetPersonalSchedule)
-					r.Post("/schedule", api.CreatePersonalSchedule)
+					r.Get("/schedule", api.GetTrainerSchedule)
+					r.Post("/schedule", api.CreateTrainerSchedule)
 				})
 			})
 
 			r.Route("/subscriptions", func(r chi.Router) {
 				r.Post("/", api.SubscribeToPlan)
+				r.Put("/", api.UpdateSubscription)
 				r.Delete("/", api.CancelPlan)
 			})
 

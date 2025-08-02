@@ -26,7 +26,7 @@ type Querier interface {
 	MarkPasswordResetTokenAsUsed(ctx context.Context, token string) error
 
 	CreateWorkout(ctx context.Context, arg CreateWorkoutParams) (uuid.UUID, error)
-	GetWorkouts(ctx context.Context, personalID *uuid.UUID) ([]GetWorkoutsRow, error)
+	GetWorkouts(ctx context.Context, userID uuid.UUID) ([]GetWorkoutsRow, error)
 	GetWorkoutById(ctx context.Context, arg GetWorkoutByIdParams) (*GetWorkoutByIdRow, error)
 	UpdateWorkout(ctx context.Context, arg UpdateWorkoutParams) error
 	DeleteWorkout(ctx context.Context, arg DeleteWorkoutParams) error

@@ -1,9 +1,12 @@
 package pgstore
 
 import (
+	"database/sql/driver"
+	"fmt"
 	"time"
 
 	"github.com/google/uuid"
+	"github.com/lib/pq"
 )
 
 // Enums
@@ -14,6 +17,26 @@ const (
 	RoleStudent  Role = "STUDENT"
 	RoleAdmin    Role = "ADMIN"
 )
+
+func (r *Role) Scan(value any) error {
+	if value == nil {
+		*r = ""
+		return nil
+	}
+	switch s := value.(type) {
+	case string:
+		*r = Role(s)
+	case []byte:
+		*r = Role(s)
+	default:
+		return fmt.Errorf("cannot scan %T into Role", value)
+	}
+	return nil
+}
+
+func (r Role) Value() (driver.Value, error) {
+	return string(r), nil
+}
 
 type SchedulingStatus string
 
@@ -26,6 +49,26 @@ const (
 	SchedulingStatusCompleted           SchedulingStatus = "COMPLETED"
 	SchedulingStatusMissed              SchedulingStatus = "MISSED"
 )
+
+func (s *SchedulingStatus) Scan(value any) error {
+	if value == nil {
+		*s = ""
+		return nil
+	}
+	switch v := value.(type) {
+	case string:
+		*s = SchedulingStatus(v)
+	case []byte:
+		*s = SchedulingStatus(v)
+	default:
+		return fmt.Errorf("cannot scan %T into SchedulingStatus", value)
+	}
+	return nil
+}
+
+func (s SchedulingStatus) Value() (driver.Value, error) {
+	return string(s), nil
+}
 
 type SchedulingType string
 
@@ -42,6 +85,26 @@ const (
 	LevelAdvanced     Level = "ADVANCED"
 )
 
+func (l *Level) Scan(value any) error {
+	if value == nil {
+		*l = ""
+		return nil
+	}
+	switch s := value.(type) {
+	case string:
+		*l = Level(s)
+	case []byte:
+		*l = Level(s)
+	default:
+		return fmt.Errorf("cannot scan %T into Level", value)
+	}
+	return nil
+}
+
+func (l Level) Value() (driver.Value, error) {
+	return string(l), nil
+}
+
 type Day string
 
 const (
@@ -53,6 +116,66 @@ const (
 	DaySex Day = "Sex"
 	DaySab Day = "Sab"
 )
+
+func (d *Day) Scan(value any) error {
+	if value == nil {
+		*d = ""
+		return nil
+	}
+	switch s := value.(type) {
+	case string:
+		*d = Day(s)
+	case []byte:
+		*d = Day(s)
+	default:
+		return fmt.Errorf("cannot scan %T into Day", value)
+	}
+	return nil
+}
+
+func (d Day) Value() (driver.Value, error) {
+	return string(d), nil
+}
+
+// Custom array type for pgxscan compatibility with PostgreSQL arrays
+type DayArray []Day
+
+// Implement sql.Scanner interface for DayArray
+func (da *DayArray) Scan(value interface{}) error {
+	if value == nil {
+		*da = nil
+		return nil
+	}
+	
+	// Handle pq.Array scanning
+	var stringArray []string
+	if err := pq.Array(&stringArray).Scan(value); err != nil {
+		return err
+	}
+	
+	// Convert strings to Day types
+	*da = make(DayArray, len(stringArray))
+	for i, s := range stringArray {
+		(*da)[i] = Day(s)
+	}
+	
+	return nil
+}
+
+// Implement driver.Valuer interface for DayArray
+func (da DayArray) Value() (driver.Value, error) {
+	if da == nil {
+		return nil, nil
+	}
+	
+	// Convert to string array for pq.Array
+	stringArray := make([]string, len(da))
+	for i, d := range da {
+		stringArray[i] = string(d)
+	}
+	
+	return pq.Array(stringArray).Value()
+}
 
 // Database table models - these are the authoritative data shapes
 type User struct {
@@ -195,20 +318,20 @@ type Message struct {
 }
 
 type WorkoutsHistory struct {
-	ID                uuid.UUID `json:"id" db:"id"`
-	StudentID         uuid.UUID `json:"studentId" db:"student_id"`
-	WorkoutID         uuid.UUID `json:"workoutId" db:"workout_id"`
-	ExecutionTime     *string   `json:"executionTime,omitempty" db:"execution_time"`
-	Weight            int32     `json:"weight" db:"weight"`
-	Sets              string    `json:"sets" db:"sets"`
-	Reps              string    `json:"reps" db:"reps"`
-	RestTime          *int32    `json:"restTime,omitempty" db:"rest_time"`
-	Thumbnail         *string   `json:"thumbnail,omitempty" db:"thumbnail"`
-	TimeTotalWorkout  int32     `json:"timeTotalWorkout" db:"time_total_workout"`
-	ExerciseTitle     string    `json:"exerciseTitle" db:"exercise_title"`
-	ExerciseID        uuid.UUID `json:"exerciseId" db:"exercise_id"`
-	CreatedAt         time.Time `json:"createdAt" db:"created_at"`
-	UpdatedAt         time.Time `json:"updatedAt" db:"updated_at"`
+	ID               uuid.UUID `json:"id" db:"id"`
+	StudentID        uuid.UUID `json:"studentId" db:"student_id"`
+	WorkoutID        uuid.UUID `json:"workoutId" db:"workout_id"`
+	ExecutionTime    *string   `json:"executionTime,omitempty" db:"execution_time"`
+	Weight           int32     `json:"weight" db:"weight"`
+	Sets             string    `json:"sets" db:"sets"`
+	Reps             string    `json:"reps" db:"reps"`
+	RestTime         *int32    `json:"restTime,omitempty" db:"rest_time"`
+	Thumbnail        *string   `json:"thumbnail,omitempty" db:"thumbnail"`
+	TimeTotalWorkout int32     `json:"timeTotalWorkout" db:"time_total_workout"`
+	ExerciseTitle    string    `json:"exerciseTitle" db:"exercise_title"`
+	ExerciseID       uuid.UUID `json:"exerciseId" db:"exercise_id"`
+	CreatedAt        time.Time `json:"createdAt" db:"created_at"`
+	UpdatedAt        time.Time `json:"updatedAt" db:"updated_at"`
 }
 
 type Comment struct {
@@ -269,6 +392,7 @@ type MessageResponse struct {
 	Content    string    `json:"content"`
 	SentAt     time.Time `json:"sentAt"`
 }
+
 // Request/Response types
 type AuthenticateWithPasswordRequest struct {
 	Email    string `json:"email" validate:"required,email"`
@@ -371,21 +495,21 @@ type UpdateExerciseRequest struct {
 }
 
 type CreateSchedulingRequest struct {
-	Date      time.Time      `json:"date" validate:"required"`
-	StartTime time.Time      `json:"startTime" validate:"required"`
-	EndTime   time.Time      `json:"endTime" validate:"required"`
-	Type      SchedulingType `json:"type" validate:"required"`
-	Notes     *string        `json:"notes,omitempty"`
-	PersonalID uuid.UUID     `json:"personalId" validate:"required"`
+	Date       time.Time      `json:"date" validate:"required"`
+	StartTime  time.Time      `json:"startTime" validate:"required"`
+	EndTime    time.Time      `json:"endTime" validate:"required"`
+	Type       SchedulingType `json:"type" validate:"required"`
+	Notes      *string        `json:"notes,omitempty"`
+	PersonalID uuid.UUID      `json:"personalId" validate:"required"`
 }
 
 type UpdateSchedulingRequest struct {
-	Date      *time.Time      `json:"date,omitempty"`
-	StartTime *time.Time      `json:"startTime,omitempty"`
-	EndTime   *time.Time      `json:"endTime,omitempty"`
+	Date      *time.Time        `json:"date,omitempty"`
+	StartTime *time.Time        `json:"startTime,omitempty"`
+	EndTime   *time.Time        `json:"endTime,omitempty"`
 	Status    *SchedulingStatus `json:"status,omitempty"`
-	Type      *SchedulingType `json:"type,omitempty"`
-	Notes     *string         `json:"notes,omitempty"`
+	Type      *SchedulingType   `json:"type,omitempty"`
+	Notes     *string           `json:"notes,omitempty"`
 }
 type WorkoutFrequencyResponse struct {
 	TotalWorkouts   int32   `json:"total_workouts"`
@@ -417,17 +541,17 @@ type ExerciseProgressPoint struct {
 }
 
 type ExercisePerformanceResponse struct {
-	ExerciseName      string                  `json:"exercise_name"`
-	TotalSessions     int32                   `json:"total_sessions"`
-	MaxWeight         *float64                `json:"max_weight,omitempty"`
-	MaxReps           int32                   `json:"max_reps"`
-	MaxVolume         float64                 `json:"max_volume"`
-	AverageWeight     *float64                `json:"average_weight,omitempty"`
-	AverageReps       float64                 `json:"average_reps"`
-	AverageVolume     float64                 `json:"average_volume"`
-	FirstRecorded     time.Time               `json:"first_recorded"`
-	LastRecorded      time.Time               `json:"last_recorded"`
-	ProgressData      []ExerciseProgressPoint `json:"progress_data"`
+	ExerciseName  string                  `json:"exercise_name"`
+	TotalSessions int32                   `json:"total_sessions"`
+	MaxWeight     *float64                `json:"max_weight,omitempty"`
+	MaxReps       int32                   `json:"max_reps"`
+	MaxVolume     float64                 `json:"max_volume"`
+	AverageWeight *float64                `json:"average_weight,omitempty"`
+	AverageReps   float64                 `json:"average_reps"`
+	AverageVolume float64                 `json:"average_volume"`
+	FirstRecorded time.Time               `json:"first_recorded"`
+	LastRecorded  time.Time               `json:"last_recorded"`
+	ProgressData  []ExerciseProgressPoint `json:"progress_data"`
 }
 
 type UserStatisticsResponse struct {
@@ -670,13 +794,13 @@ type AvailabilitySlot struct {
 }
 
 type SchedulingHistoryResponse struct {
-	ID            uuid.UUID        `json:"id"`
-	Date          time.Time        `json:"date"`
-	Type          SchedulingType   `json:"type"`
-	Status        SchedulingStatus `json:"status"`
-	WorkoutName   *string          `json:"workout_name,omitempty"`
-	PartnerName   string           `json:"partner_name"`
-	CompletedAt   *time.Time       `json:"completed_at,omitempty"`
+	ID          uuid.UUID        `json:"id"`
+	Date        time.Time        `json:"date"`
+	Type        SchedulingType   `json:"type"`
+	Status      SchedulingStatus `json:"status"`
+	WorkoutName *string          `json:"workout_name,omitempty"`
+	PartnerName string           `json:"partner_name"`
+	CompletedAt *time.Time       `json:"completed_at,omitempty"`
 }
 
 type PlanResponse struct {
